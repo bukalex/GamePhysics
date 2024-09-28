@@ -8,7 +8,13 @@ public class PhysicsSystem : MonoBehaviour
     private static List<PhysicsBody> physicsBodies = new List<PhysicsBody>();
     private static GameObject instance = null;
 
-    private static Vector3 gravity = new Vector3(0, -9.8f, 0);
+    private static PhysicsSettings Settings
+    {
+        get
+        {
+            return PhysicsSettings.CurrentSettings;
+        }
+    }
 
     private void Awake()
     {
@@ -27,6 +33,11 @@ public class PhysicsSystem : MonoBehaviour
     private void FixedUpdate()
     {
         if (physicsBodies.Count == 0) return;
+        if (!Settings)
+        {
+            Debug.LogWarning("No physics settings enabled.");
+            return;
+        }
 
         foreach (PhysicsBody physicsBody in physicsBodies)
         {
@@ -70,7 +81,7 @@ public class PhysicsSystem : MonoBehaviour
 
     private static void ApplyGravity(PhysicsBody physicsBody)
     {
-        physicsBody.Velocity += gravity * Time.fixedDeltaTime;
+        physicsBody.Velocity += Settings.gravity * Time.fixedDeltaTime;
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
