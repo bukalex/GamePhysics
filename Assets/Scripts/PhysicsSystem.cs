@@ -130,6 +130,7 @@ public class PhysicsSystem : MonoBehaviour
     private static void ApplyVelocity(PhysicsBody physicsBody)
     {
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
+        if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
     }
 
     private static bool AreShapesOvelapping(PhysicsShape shapeA, PhysicsShape shapeB, out HitResult hitResult)
@@ -174,6 +175,7 @@ public class PhysicsSystem : MonoBehaviour
             Vector3 projectionOnNormal = Vector3.Project(targetBody.Velocity, hitResult.impactNormal);
 
             targetBody.Velocity = projectionOnPlane - projectionOnNormal;
+            ApplyVelocity(targetBody);
         }
     }
 }

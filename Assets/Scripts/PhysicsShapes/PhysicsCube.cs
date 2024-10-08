@@ -11,19 +11,19 @@ public class PhysicsCube : PhysicsShape
     {
         SurfacePoint point = default;
 
-        Vector3 localPosition = otherPoint - Position;
-        point.position = Position + new Vector3(
+        Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (otherPoint - Position);
+        point.position = Position + transform.rotation * new Vector3(
             Mathf.Clamp(localPosition.x, -size.x, size.x), 
             Mathf.Clamp(localPosition.y, -size.y, size.y), 
             Mathf.Clamp(localPosition.z, -size.z, size.z));
-        point.normal = (localPosition - point.position).normalized;
+        point.normal = (otherPoint - point.position).normalized;
 
         return point;
     }
 
     public override bool IsPointInside(Vector3 point)
     {
-        Vector3 localPosition = point - Position;
+        Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (point - Position);
 
         return 
             Mathf.Abs(localPosition.x) <= size.x && 

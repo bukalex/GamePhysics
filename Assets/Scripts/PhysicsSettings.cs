@@ -11,6 +11,7 @@ public class PhysicsSettings : ScriptableObject
     private bool isEnabled = false;
 
     public Vector3 gravity = new Vector3(0, -9.8f, 0);
+    public float deadZone = -25;
 
     private void OnEnable()
     {
