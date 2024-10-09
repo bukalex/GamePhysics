@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drag: 0
-  mass: 0.001
+  mass: 1
 --- !u!23 &145855459
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -281,7 +281,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drag: 0
-  mass: 0.001
+  mass: 1
 --- !u!23 &270222629
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -926,7 +926,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drag: 0
-  mass: 0.001
+  mass: 1
 --- !u!33 &2227081024595021161
 MeshFilter:
   m_ObjectHideFlags: 0

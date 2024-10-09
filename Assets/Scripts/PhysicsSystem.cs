@@ -165,18 +165,23 @@ public class PhysicsSystem : MonoBehaviour
     {
         if (!targetBody) return;
 
+        Vector3 projectionOnPlaneTarget = Vector3.ProjectOnPlane(targetBody.Velocity, hitResult.impactNormal);
+        Vector3 projectionOnNormalTarget = Vector3.Project(targetBody.Velocity, hitResult.impactNormal);
+
         if (hitBody)
         {
+            Vector3 projectionOnNormalHit = Vector3.Project(hitBody.Velocity, hitResult.impactNormal);
 
+            targetBody.Velocity = projectionOnPlaneTarget +
+                (2 * hitBody.Mass * projectionOnNormalHit + projectionOnNormalTarget * (targetBody.Mass - hitBody.Mass)) /
+                (targetBody.Mass + hitBody.Mass);
         }
         else
         {
-            Vector3 projectionOnPlane = Vector3.ProjectOnPlane(targetBody.Velocity, hitResult.impactNormal);
-            Vector3 projectionOnNormal = Vector3.Project(targetBody.Velocity, hitResult.impactNormal);
-
-            targetBody.Velocity = projectionOnPlane - projectionOnNormal;
-            ApplyVelocity(targetBody);
+            targetBody.Velocity = projectionOnPlaneTarget - projectionOnNormalTarget;
         }
+
+        ApplyVelocity(targetBody);
     }
 }
 
