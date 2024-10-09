@@ -5,7 +5,31 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PhysicsSettings", menuName = "Physics Settings")]
 public class PhysicsSettings : ScriptableObject
 {
-    public static PhysicsSettings CurrentSettings { get; private set; }
+    public static PhysicsSettings CurrentSettings
+    {
+        get
+        {
+            if (!currentSettings)
+            {
+                FindSettingsAssets();
+
+                foreach (PhysicsSettings settings in allSettings)
+                {
+                    if (settings.isEnabled) return settings;
+                }
+            }
+
+            return null;
+        }
+        set
+        {
+            currentSettings = value;
+        }
+    }
+    public static PhysicsSettings currentSettings;
+
+    private static string path = "Settings";
+    private static PhysicsSettings[] allSettings;
 
     [SerializeField]
     private bool isEnabled = false;
@@ -13,11 +37,8 @@ public class PhysicsSettings : ScriptableObject
     public Vector3 gravity = new Vector3(0, -9.8f, 0);
     public float deadZone = -25;
 
-    private void OnEnable()
+    private static void FindSettingsAssets()
     {
-        if (!isEnabled) return;
-
-        CurrentSettings = this;
-        Debug.Log("Physics settings enabled.");
+        allSettings = Resources.LoadAll<PhysicsSettings>(path);
     }
 }
