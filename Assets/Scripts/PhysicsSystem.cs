@@ -48,43 +48,10 @@ public class PhysicsSystem : MonoBehaviour
             ApplyVelocity(physicsBody);
         }
 
-        for (int shapeA = 0; shapeA < physicsShapes.Count - 1; shapeA++)
-        {
-            for (int shapeB = shapeA + 1; shapeB < physicsShapes.Count; shapeB++)
-            {
-                if (!physicsShapes[shapeA]) continue;
-                if (!physicsShapes[shapeB]) continue;
-
-                if (AreShapesOvelapping(physicsShapes[shapeA], physicsShapes[shapeB], out HitResult hitResult))
-                {
-                    if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
-                    {
-                        Debug.Log("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
-                    }
-                    else
-                    {
-                        Debug.Log("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
-
-                        ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
-                        ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
-
-                        if (physicsShapes[shapeA].Body)
-                        {
-                            physicsShapes[shapeA].Body.ApplyPendingVelocity();
-                            ApplyVelocity(physicsShapes[shapeA].Body);
-                        }
-
-                        if (physicsShapes[shapeB].Body)
-                        {
-                            physicsShapes[shapeB].Body.ApplyPendingVelocity();
-                            ApplyVelocity(physicsShapes[shapeB].Body);
-                        }
-                    }
-                }
-            }
-        }
+        RunCollisionChecks();
     }
 
+    #region Registration
     private void OnSceneUnload(Scene scene)
     {
         physicsBodies.Clear();
@@ -132,6 +99,7 @@ public class PhysicsSystem : MonoBehaviour
         physicsShapes.Remove(physicsShape);
         Debug.Log("Physics shape was unregistred. Physics shapes registred in simulation: " + physicsShapes.Count);
     }
+    #endregion
 
     private static void ApplyGravity(PhysicsBody physicsBody)
     {
@@ -150,6 +118,45 @@ public class PhysicsSystem : MonoBehaviour
     {
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
+    }
+
+    private static void RunCollisionChecks()
+    {
+        for (int shapeA = 0; shapeA < physicsShapes.Count - 1; shapeA++)
+        {
+            for (int shapeB = shapeA + 1; shapeB < physicsShapes.Count; shapeB++)
+            {
+                if (!physicsShapes[shapeA]) continue;
+                if (!physicsShapes[shapeB]) continue;
+
+                if (AreShapesOvelapping(physicsShapes[shapeA], physicsShapes[shapeB], out HitResult hitResult))
+                {
+                    if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
+                    {
+                        Debug.Log("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+                    }
+                    else
+                    {
+                        Debug.Log("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+
+                        ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
+
+                        if (physicsShapes[shapeA].Body)
+                        {
+                            physicsShapes[shapeA].Body.ApplyPendingVelocity();
+                            ApplyVelocity(physicsShapes[shapeA].Body);
+                        }
+
+                        if (physicsShapes[shapeB].Body)
+                        {
+                            physicsShapes[shapeB].Body.ApplyPendingVelocity();
+                            ApplyVelocity(physicsShapes[shapeB].Body);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static bool AreShapesOvelapping(PhysicsShape shapeA, PhysicsShape shapeB, out HitResult hitResult)
