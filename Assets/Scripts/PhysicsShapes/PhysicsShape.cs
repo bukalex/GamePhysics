@@ -13,6 +13,8 @@ public abstract class PhysicsShape : MonoBehaviour
         }
     }
 
+    public bool isTrigger = false;
+
     protected virtual void Awake()
     {
         Body = GetComponent<PhysicsBody>();

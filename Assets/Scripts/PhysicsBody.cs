@@ -46,6 +46,8 @@ public class PhysicsBody : MonoBehaviour
     [Min(0.001f)]
     private float mass;
 
+    private Vector3 pendingVelocity;
+
     private void Awake()
     {
         PhysicsSystem.RegisterPhysicsBody(this);
@@ -54,5 +56,15 @@ public class PhysicsBody : MonoBehaviour
     private void OnDestroy()
     {
         PhysicsSystem.UnregisterPhysicsBody(this);
+    }
+
+    public void SaveVelocity(Vector3 value)
+    {
+        pendingVelocity = value;
+    }
+
+    public void ApplyPendingVelocity()
+    {
+        Velocity = pendingVelocity;
     }
 }

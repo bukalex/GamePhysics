@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -155,6 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTrigger: 0
   radius: 0.5
 --- !u!114 &145855458
 MonoBehaviour:
@@ -267,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTrigger: 0
   radius: 0.5
 --- !u!114 &270222628
 MonoBehaviour:
@@ -532,11 +534,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 807751654}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64195e40947b8194e97943213d4f3667, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTrigger: 0
   size: {x: 7.5, y: 0.25, z: 1.5}
 --- !u!1 &923372545
 GameObject:
@@ -708,6 +711,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64195e40947b8194e97943213d4f3667, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTrigger: 0
   size: {x: 2, y: 0.25, z: 1.5}
 --- !u!23 &1680870106
 MeshRenderer:
@@ -805,6 +809,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTrigger: 1
   radius: 0.5
 --- !u!23 &2056602712
 MeshRenderer:
@@ -982,6 +987,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isTrigger: 0
   radius: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

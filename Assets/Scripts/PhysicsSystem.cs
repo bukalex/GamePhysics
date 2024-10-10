@@ -57,10 +57,29 @@ public class PhysicsSystem : MonoBehaviour
 
                 if (AreShapesOvelapping(physicsShapes[shapeA], physicsShapes[shapeB], out HitResult hitResult))
                 {
-                    Debug.Log("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+                    if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
+                    {
+                        Debug.Log("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+                    }
+                    else
+                    {
+                        Debug.Log("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
-                    ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
-                    ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
+
+                        if (physicsShapes[shapeA].Body)
+                        {
+                            physicsShapes[shapeA].Body.ApplyPendingVelocity();
+                            ApplyVelocity(physicsShapes[shapeA].Body);
+                        }
+
+                        if (physicsShapes[shapeB].Body)
+                        {
+                            physicsShapes[shapeB].Body.ApplyPendingVelocity();
+                            ApplyVelocity(physicsShapes[shapeB].Body);
+                        }
+                    }
                 }
             }
         }
@@ -167,21 +186,21 @@ public class PhysicsSystem : MonoBehaviour
 
         Vector3 projectionOnPlaneTarget = Vector3.ProjectOnPlane(targetBody.Velocity, hitResult.impactNormal);
         Vector3 projectionOnNormalTarget = Vector3.Project(targetBody.Velocity, hitResult.impactNormal);
+        Vector3 pendingVelocityTarget;
 
         if (hitBody)
         {
             Vector3 projectionOnNormalHit = Vector3.Project(hitBody.Velocity, hitResult.impactNormal);
-
-            targetBody.Velocity = projectionOnPlaneTarget +
+            pendingVelocityTarget = projectionOnPlaneTarget +
                 (2 * hitBody.Mass * projectionOnNormalHit + projectionOnNormalTarget * (targetBody.Mass - hitBody.Mass)) /
                 (targetBody.Mass + hitBody.Mass);
         }
         else
         {
-            targetBody.Velocity = projectionOnPlaneTarget - projectionOnNormalTarget;
+            pendingVelocityTarget = projectionOnPlaneTarget - projectionOnNormalTarget;
         }
 
-        ApplyVelocity(targetBody);
+        targetBody.SaveVelocity(pendingVelocityTarget);
     }
 }
 
