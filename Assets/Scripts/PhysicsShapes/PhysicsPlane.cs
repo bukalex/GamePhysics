@@ -24,6 +24,13 @@ public class PhysicsPlane : PhysicsShape
 
     public override bool IsPointInside(Vector3 point)
     {
-        return false;
+        return Vector3.Dot(Normal, point - Position) == 0;
+    }
+
+    protected override void DrawWireShape()
+    {
+        Gizmos.DrawLine(Position, Position + Normal);
+        Gizmos.matrix = Matrix4x4.TRS(Position, transform.rotation, Vector3.one);
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(2, 0, 2));
     }
 }

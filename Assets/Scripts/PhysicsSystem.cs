@@ -42,6 +42,7 @@ public class PhysicsSystem : MonoBehaviour
         foreach (PhysicsBody physicsBody in physicsBodies)
         {
             if (!physicsBody) continue;
+            if (!physicsBody.isActiveAndEnabled) continue;
 
             ApplyGravity(physicsBody);
             ApplyDamping(physicsBody);
@@ -124,13 +125,19 @@ public class PhysicsSystem : MonoBehaviour
     {
         for (int shapeA = 0; shapeA < physicsShapes.Count - 1; shapeA++)
         {
+            if (!physicsShapes[shapeA]) continue;
+            if (!physicsShapes[shapeA].isActiveAndEnabled) continue;
+
             for (int shapeB = shapeA + 1; shapeB < physicsShapes.Count; shapeB++)
             {
-                if (!physicsShapes[shapeA]) continue;
                 if (!physicsShapes[shapeB]) continue;
+                if (!physicsShapes[shapeB].isActiveAndEnabled) continue;
 
                 if (AreShapesOvelapping(physicsShapes[shapeA], physicsShapes[shapeB], out HitResult hitResult))
                 {
+                    physicsShapes[shapeA].DrawCollision(Time.fixedDeltaTime);
+                    physicsShapes[shapeB].DrawCollision(Time.fixedDeltaTime);
+
                     if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
                     {
                         Debug.Log("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);

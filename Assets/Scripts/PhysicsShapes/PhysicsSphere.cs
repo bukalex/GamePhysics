@@ -22,4 +22,9 @@ public class PhysicsSphere : PhysicsShape
     {
         return Vector3.Distance(Position, point) <= radius;
     }
+
+    protected override void DrawWireShape()
+    {
+        Gizmos.DrawWireSphere(Position, radius);
+    }
 }

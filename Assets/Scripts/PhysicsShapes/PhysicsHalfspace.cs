@@ -6,6 +6,6 @@ public class PhysicsHalfspace : PhysicsPlane
 {
     public override bool IsPointInside(Vector3 point)
     {
-        return Vector3.Dot(Normal, point - Position) <= 0;
+        return Mathf.Round(Vector3.Dot(Normal, point - Position) * 1000f) / 1000f <= 0;
     }
 }

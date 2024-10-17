@@ -156,6 +156,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 0
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
   radius: 0.5
 --- !u!114 &145855458
 MonoBehaviour:
@@ -269,6 +271,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 0
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
   radius: 0.5
 --- !u!114 &270222628
 MonoBehaviour:
@@ -443,104 +447,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &807751654
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 807751657}
-  - component: {fileID: 807751656}
-  - component: {fileID: 807751655}
-  - component: {fileID: 807751658}
-  m_Layer: 0
-  m_Name: Ground
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!23 &807751655
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807751654}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &807751656
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807751654}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &807751657
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807751654}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -3, z: 0}
-  m_LocalScale: {x: 15, y: 0.5, z: 3}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &807751658
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807751654}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64195e40947b8194e97943213d4f3667, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isTrigger: 0
-  size: {x: 7.5, y: 0.25, z: 1.5}
 --- !u!1 &923372545
 GameObject:
   m_ObjectHideFlags: 0
@@ -680,7 +586,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1674355999
+--- !u!1 &1536456825
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -688,8 +594,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1674356001}
-  - component: {fileID: 1674356000}
+  - component: {fileID: 1536456827}
+  - component: {fileID: 1536456826}
   m_Layer: 0
   m_Name: Halfspace
   m_TagString: Untagged
@@ -697,34 +603,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1674356000
+--- !u!114 &1536456826
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1674355999}
+  m_GameObject: {fileID: 1536456825}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 144caea7cc0345a46b839eacf925201d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 1
---- !u!4 &1674356001
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
+--- !u!4 &1536456827
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1674355999}
+  m_GameObject: {fileID: 1536456825}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 7, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!1 &1680870104
 GameObject:
   m_ObjectHideFlags: 0
@@ -738,7 +646,7 @@ GameObject:
   - component: {fileID: 1680870106}
   - component: {fileID: 1680870105}
   m_Layer: 0
-  m_Name: Ground (1)
+  m_Name: Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -757,6 +665,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 0
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
   size: {x: 2, y: 0.25, z: 1.5}
 --- !u!23 &1680870106
 MeshRenderer:
@@ -853,6 +763,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 0
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
 --- !u!4 &1718132819
 Transform:
   m_ObjectHideFlags: 0
@@ -900,6 +812,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 1
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
   radius: 0.5
 --- !u!23 &2056602712
 MeshRenderer:
@@ -1078,6 +992,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 0
+  offset: {x: 0, y: 0, z: 0}
+  isOverlapping: 0
   radius: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -1090,7 +1006,6 @@ SceneRoots:
   - {fileID: 145855461}
   - {fileID: 2056602714}
   - {fileID: 923372546}
-  - {fileID: 807751657}
   - {fileID: 1680870108}
   - {fileID: 1718132819}
-  - {fileID: 1674356001}
+  - {fileID: 1536456827}

@@ -30,4 +30,10 @@ public class PhysicsCube : PhysicsShape
             Mathf.Abs(localPosition.y) <= size.y && 
             Mathf.Abs(localPosition.z) <= size.z;
     }
+
+    protected override void DrawWireShape()
+    {
+        Gizmos.matrix = Matrix4x4.TRS(Position, transform.rotation, Vector3.one);
+        Gizmos.DrawWireCube(Vector3.zero, size * 2);
+    }
 }
