@@ -8,6 +8,7 @@ public class PhysicsSystem : MonoBehaviour
     private static List<PhysicsBody> physicsBodies = new List<PhysicsBody>();
     private static List<PhysicsShape> physicsShapes = new List<PhysicsShape>();
     private static GameObject instance = null;
+    private static float deltaTime;
 
     private static PhysicsSettings Settings
     {
@@ -38,6 +39,8 @@ public class PhysicsSystem : MonoBehaviour
             Debug.LogWarning("No physics settings enabled.");
             return;
         }
+
+        deltaTime = Time.fixedDeltaTime * Settings.physicsTimeScale;
 
         foreach (PhysicsBody physicsBody in physicsBodies)
         {
@@ -104,20 +107,20 @@ public class PhysicsSystem : MonoBehaviour
 
     private static void ApplyGravity(PhysicsBody physicsBody)
     {
-        physicsBody.Velocity += Settings.gravity * Time.fixedDeltaTime;
+        physicsBody.Velocity += Settings.gravity * deltaTime;
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
     {
         physicsBody.Velocity += 
             -physicsBody.Velocity.normalized * 
-            physicsBody.Drag * Mathf.Pow(physicsBody.Velocity.magnitude, 2) * 
-            Time.fixedDeltaTime;
+            physicsBody.Drag * Mathf.Pow(physicsBody.Velocity.magnitude, 2) *
+            deltaTime;
     }
 
     private static void ApplyVelocity(PhysicsBody physicsBody)
     {
-        physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
+        physicsBody.Position += physicsBody.Velocity * Settings.unitsPerMeter * deltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
     }
 

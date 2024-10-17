@@ -38,6 +38,10 @@ public class PhysicsSettings : ScriptableObject
 
     public Vector3 gravity = new Vector3(0, -9.8f, 0);
     public float deadZone = -25;
+    [Min(0)]
+    public float unitsPerMeter = 1;
+    [Min(0)]
+    public float physicsTimeScale = 1;
 
     [RuntimeInitializeOnLoadMethod]
     private static void FindSettingsAssets()
