@@ -14,16 +14,23 @@ public abstract class PhysicsShape : MonoBehaviour
     }
 
     public bool isTrigger = false;
+    [HideInInspector]
+    public bool isOverlapping = false;
 
     [SerializeField]
     protected Vector3 offset;
-    public bool isOverlapping = false;
     protected Coroutine CurrentDrawCollisionCoroutine;
+
+    protected IBeginOverlap[] beginOverlapListeners;
+    protected IHit[] hitListeners;
 
     protected virtual void Awake()
     {
         Body = GetComponent<PhysicsBody>();
         PhysicsSystem.RegisterPhysicsShape(this);
+
+        beginOverlapListeners = GetComponents<IBeginOverlap>();
+        hitListeners = GetComponents<IHit>();
     }
 
     protected virtual void OnDrawGizmos()
@@ -38,13 +45,29 @@ public abstract class PhysicsShape : MonoBehaviour
         PhysicsSystem.UnregisterPhysicsShape(this);
     }
 
+    public virtual void OnBeginOverlap(PhysicsShape otherShape, HitResult hitResult)
+    {
+        foreach (IBeginOverlap beginOverlapListener in beginOverlapListeners)
+        {
+            beginOverlapListener.OnBeginOverlap(otherShape, hitResult);
+        }
+    }
+
+    public virtual void OnHit(PhysicsShape otherShape, HitResult hitResult)
+    {
+        foreach (IHit hitListener in hitListeners)
+        {
+            hitListener.OnHit(otherShape, hitResult);
+        }
+    }
+
     public virtual void DrawCollision(float duration)
     {
         if (CurrentDrawCollisionCoroutine != null) StopCoroutine(CurrentDrawCollisionCoroutine);
         CurrentDrawCollisionCoroutine = StartCoroutine(DrawCollisionCoroutine(duration));
     }
 
-    protected IEnumerator DrawCollisionCoroutine(float duration)
+    protected virtual IEnumerator DrawCollisionCoroutine(float duration)
     {
         isOverlapping = true;
         yield return new WaitForSeconds(duration);

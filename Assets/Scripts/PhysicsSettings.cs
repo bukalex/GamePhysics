@@ -9,6 +9,8 @@ public class PhysicsSettings : ScriptableObject
     {
         get
         {
+            if (allSettings == null) FindSettingsAssets();
+
             if (allSettings != null)
             {
                 foreach (PhysicsSettings settings in allSettings)
@@ -38,8 +40,8 @@ public class PhysicsSettings : ScriptableObject
 
     public Vector3 gravity = new Vector3(0, -9.8f, 0);
     public float deadZone = -25;
+    public bool enableLogs = false;
 
-    [RuntimeInitializeOnLoadMethod]
     private static void FindSettingsAssets()
     {
         allSettings = Resources.LoadAll<PhysicsSettings>(path);
