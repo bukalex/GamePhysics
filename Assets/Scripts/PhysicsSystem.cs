@@ -59,10 +59,10 @@ public class PhysicsSystem : MonoBehaviour
     private void OnSceneUnload(Scene scene)
     {
         physicsBodies.Clear();
-        Debug.Log("Physics body list was cleared.");
+        PrintLog("Physics body list was cleared.");
 
         physicsShapes.Clear();
-        Debug.Log("Physics shape list was cleared.");
+        PrintLog("Physics shape list was cleared.");
 
         SceneManager.sceneUnloaded -= OnSceneUnload;
     }
@@ -71,7 +71,7 @@ public class PhysicsSystem : MonoBehaviour
     {
         GameObject newInstance = new GameObject("Physics System");
         newInstance.AddComponent<PhysicsSystem>();
-        Debug.Log("Physics System instance was created.");
+        PrintLog("Physics System instance was created.");
     } 
 
     public static void RegisterPhysicsBody(PhysicsBody physicsBody)
@@ -80,13 +80,13 @@ public class PhysicsSystem : MonoBehaviour
         if (physicsBodies.Contains(physicsBody)) return;
 
         physicsBodies.Add(physicsBody);
-        Debug.Log("Physics body was registred. Physics bodies registred in simulation: " + physicsBodies.Count);
+        PrintLog("Physics body was registred. Physics bodies registred in simulation: " + physicsBodies.Count);
     }
 
     public static void UnregisterPhysicsBody(PhysicsBody physicsBody)
     {
         physicsBodies.Remove(physicsBody);
-        Debug.Log("Physics body was unregistred. Physics bodies registred in simulation: " + physicsBodies.Count);
+        PrintLog("Physics body was unregistred. Physics bodies registred in simulation: " + physicsBodies.Count);
     }
 
     public static void RegisterPhysicsShape(PhysicsShape physicsShape)
@@ -95,13 +95,13 @@ public class PhysicsSystem : MonoBehaviour
         if (physicsShapes.Contains(physicsShape)) return;
 
         physicsShapes.Add(physicsShape);
-        Debug.Log("Physics shape was registred. Physics shapes registred in simulation: " + physicsShapes.Count);
+        PrintLog("Physics shape was registred. Physics shapes registred in simulation: " + physicsShapes.Count);
     }
 
     public static void UnregisterPhysicsShape(PhysicsShape physicsShape)
     {
         physicsShapes.Remove(physicsShape);
-        Debug.Log("Physics shape was unregistred. Physics shapes registred in simulation: " + physicsShapes.Count);
+        PrintLog("Physics shape was unregistred. Physics shapes registred in simulation: " + physicsShapes.Count);
     }
     #endregion
 
@@ -143,11 +143,14 @@ public class PhysicsSystem : MonoBehaviour
 
                     if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
                     {
-                        Debug.Log("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+                        PrintLog("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+
+                        physicsShapes[shapeA].OnBeginOverlap(physicsShapes[shapeB], hitResult);
+                        physicsShapes[shapeB].OnBeginOverlap(physicsShapes[shapeA], hitResult);
                     }
                     else
                     {
-                        Debug.Log("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
+                        PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
                         ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
@@ -163,6 +166,9 @@ public class PhysicsSystem : MonoBehaviour
                             physicsShapes[shapeB].Body.ApplyPendingVelocity();
                             ApplyVelocity(physicsShapes[shapeB].Body);
                         }
+
+                        physicsShapes[shapeA].OnHit(physicsShapes[shapeB], hitResult);
+                        physicsShapes[shapeB].OnHit(physicsShapes[shapeA], hitResult);
                     }
                 }
             }
@@ -218,6 +224,12 @@ public class PhysicsSystem : MonoBehaviour
         }
 
         targetBody.SaveVelocity(pendingVelocityTarget);
+    }
+
+    private static void PrintLog(string log)
+    {
+        if (!Settings) Debug.LogWarning("No physics settings enabled.");
+        else if (Settings.enableLogs) Debug.Log(log);
     }
 }
 

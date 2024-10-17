@@ -9,6 +9,8 @@ public class PhysicsSettings : ScriptableObject
     {
         get
         {
+            if (allSettings == null) FindSettingsAssets();
+
             if (allSettings != null)
             {
                 foreach (PhysicsSettings settings in allSettings)
@@ -42,8 +44,8 @@ public class PhysicsSettings : ScriptableObject
     public float unitsPerMeter = 1;
     [Min(0)]
     public float physicsTimeScale = 1;
+    public bool enableLogs = false;
 
-    [RuntimeInitializeOnLoadMethod]
     private static void FindSettingsAssets()
     {
         allSettings = Resources.LoadAll<PhysicsSettings>(path);
