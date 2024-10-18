@@ -23,6 +23,7 @@ public class PhysicsSettings : ScriptableObject
                 }
             }
 
+            Time.timeScale = currentSettings.timeScale;
             return currentSettings;
         }
         set
@@ -43,7 +44,7 @@ public class PhysicsSettings : ScriptableObject
     [Min(0)]
     public float unitsPerMeter = 1;
     [Min(0)]
-    public float physicsTimeScale = 1;
+    public float timeScale = 1;
     public bool enableLogs = false;
 
     private static void FindSettingsAssets()

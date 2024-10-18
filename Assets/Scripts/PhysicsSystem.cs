@@ -8,7 +8,6 @@ public class PhysicsSystem : MonoBehaviour
     private static List<PhysicsBody> physicsBodies = new List<PhysicsBody>();
     private static List<PhysicsShape> physicsShapes = new List<PhysicsShape>();
     private static GameObject instance = null;
-    private static float deltaTime;
 
     private static PhysicsSettings Settings
     {
@@ -40,7 +39,7 @@ public class PhysicsSystem : MonoBehaviour
             return;
         }
 
-        deltaTime = Time.fixedDeltaTime * Settings.physicsTimeScale;
+        RunCollisionChecks();
 
         foreach (PhysicsBody physicsBody in physicsBodies)
         {
@@ -51,8 +50,6 @@ public class PhysicsSystem : MonoBehaviour
             ApplyDamping(physicsBody);
             ApplyVelocity(physicsBody);
         }
-
-        RunCollisionChecks();
     }
 
     #region Registration
@@ -107,7 +104,7 @@ public class PhysicsSystem : MonoBehaviour
 
     private static void ApplyGravity(PhysicsBody physicsBody)
     {
-        physicsBody.Velocity += Settings.gravity * deltaTime;
+        physicsBody.Velocity += Settings.gravity * Time.fixedDeltaTime;
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
@@ -115,12 +112,12 @@ public class PhysicsSystem : MonoBehaviour
         physicsBody.Velocity += 
             -physicsBody.Velocity.normalized * 
             physicsBody.Drag * Mathf.Pow(physicsBody.Velocity.magnitude, 2) *
-            deltaTime;
+            Time.fixedDeltaTime;
     }
 
     private static void ApplyVelocity(PhysicsBody physicsBody)
     {
-        physicsBody.Position += physicsBody.Velocity * Settings.unitsPerMeter * deltaTime;
+        physicsBody.Position += physicsBody.Velocity * Settings.unitsPerMeter * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
     }
 

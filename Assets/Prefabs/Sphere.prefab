@@ -112,9 +112,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isTrigger: 0
-  offset: {x: 0, y: 0, z: 0}
+  isTrigger: 1
   isOverlapping: 0
+  offset: {x: 0, y: 0, z: 0}
   radius: 0.5
 --- !u!114 &7668440376823340050
 MonoBehaviour:
