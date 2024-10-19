@@ -39,6 +39,8 @@ public class PhysicsSystem : MonoBehaviour
             return;
         }
 
+        RunCollisionChecks();
+
         foreach (PhysicsBody physicsBody in physicsBodies)
         {
             if (!physicsBody) continue;
@@ -48,8 +50,6 @@ public class PhysicsSystem : MonoBehaviour
             ApplyDamping(physicsBody);
             ApplyVelocity(physicsBody);
         }
-
-        RunCollisionChecks();
     }
 
     #region Registration
@@ -135,15 +135,18 @@ public class PhysicsSystem : MonoBehaviour
 
                 if (AreShapesOvelapping(physicsShapes[shapeA], physicsShapes[shapeB], out HitResult hitResult))
                 {
-                    physicsShapes[shapeA].DrawCollision(Time.fixedDeltaTime);
-                    physicsShapes[shapeB].DrawCollision(Time.fixedDeltaTime);
-
                     if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
                     {
                         PrintLog("Overlapping detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
-                        physicsShapes[shapeA].OnBeginOverlap(physicsShapes[shapeB], hitResult);
-                        physicsShapes[shapeB].OnBeginOverlap(physicsShapes[shapeA], hitResult);
+                        if (!physicsShapes[shapeA].TryOnBeginOverlap(physicsShapes[shapeB], hitResult) || Settings.callOverlapAtFirstFrame)
+                        {
+                            physicsShapes[shapeA].OnOverlap(physicsShapes[shapeB], hitResult);
+                        }
+                        if (!physicsShapes[shapeB].TryOnBeginOverlap(physicsShapes[shapeA], hitResult) || Settings.callOverlapAtFirstFrame)
+                        {
+                            physicsShapes[shapeB].OnOverlap(physicsShapes[shapeA], hitResult);
+                        }
                     }
                     else
                     {
@@ -164,8 +167,27 @@ public class PhysicsSystem : MonoBehaviour
                             ApplyVelocity(physicsShapes[shapeB].Body);
                         }
 
-                        physicsShapes[shapeA].OnHit(physicsShapes[shapeB], hitResult);
-                        physicsShapes[shapeB].OnHit(physicsShapes[shapeA], hitResult);
+                        if (!physicsShapes[shapeA].TryOnBeginHit(physicsShapes[shapeB], hitResult) || Settings.callHitAtFirstFrame)
+                        {
+                            physicsShapes[shapeA].OnHit(physicsShapes[shapeB], hitResult);
+                        }
+                        if (!physicsShapes[shapeB].TryOnBeginHit(physicsShapes[shapeA], hitResult) || Settings.callHitAtFirstFrame)
+                        {
+                            physicsShapes[shapeB].OnHit(physicsShapes[shapeA], hitResult);
+                        }
+                    }
+                }
+                else
+                {
+                    if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
+                    {
+                        physicsShapes[shapeA].TryOnEndOverlap(physicsShapes[shapeB]);
+                        physicsShapes[shapeB].TryOnEndOverlap(physicsShapes[shapeA]);
+                    }
+                    else
+                    {
+                        physicsShapes[shapeA].TryOnEndHit(physicsShapes[shapeB]);
+                        physicsShapes[shapeB].TryOnEndHit(physicsShapes[shapeA]);
                     }
                 }
             }

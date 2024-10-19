@@ -14,15 +14,19 @@ public abstract class PhysicsShape : MonoBehaviour
     }
 
     public bool isTrigger = false;
-    [HideInInspector]
-    public bool isOverlapping = false;
 
     [SerializeField]
     protected Vector3 offset;
-    protected Coroutine CurrentDrawCollisionCoroutine;
 
-    protected IBeginOverlap[] beginOverlapListeners;
-    protected IHit[] hitListeners;
+    private IBeginOverlap[] beginOverlapListeners;
+    private IOverlap[] overlapListeners;
+    private IEndOverlap[] endOverlapListeners;
+    private IBeginHit[] beginHitListeners;
+    private IHit[] hitListeners;
+    private IEndHit[] endHitListeners;
+
+    private Dictionary<PhysicsShape, HitResult> overlapShapes = new Dictionary<PhysicsShape, HitResult>();
+    private Dictionary<PhysicsShape, HitResult> hitShapes = new Dictionary<PhysicsShape, HitResult>();
 
     protected virtual void Awake()
     {
@@ -30,12 +34,16 @@ public abstract class PhysicsShape : MonoBehaviour
         PhysicsSystem.RegisterPhysicsShape(this);
 
         beginOverlapListeners = GetComponents<IBeginOverlap>();
+        overlapListeners = GetComponents<IOverlap>();
+        endOverlapListeners = GetComponents<IEndOverlap>();
+        beginHitListeners = GetComponents<IBeginHit>();
         hitListeners = GetComponents<IHit>();
+        endHitListeners = GetComponents<IEndHit>();
     }
 
     protected virtual void OnDrawGizmos()
     {
-        if (isOverlapping) Gizmos.color = Color.red;
+        if (overlapShapes.Count != 0 || hitShapes.Count != 0) Gizmos.color = Color.red;
         else Gizmos.color = isTrigger ? Color.green : Color.black;
         DrawWireShape();
     }
@@ -45,11 +53,65 @@ public abstract class PhysicsShape : MonoBehaviour
         PhysicsSystem.UnregisterPhysicsShape(this);
     }
 
-    public virtual void OnBeginOverlap(PhysicsShape otherShape, HitResult hitResult)
+    public virtual bool TryOnBeginOverlap(PhysicsShape otherShape, HitResult hitResult)
+    {
+        if (overlapShapes.ContainsKey(otherShape)) return false;
+
+        OnBeginOverlap(otherShape, hitResult);
+        overlapShapes.Add(otherShape, hitResult);
+
+        return true;
+    }
+
+    protected virtual void OnBeginOverlap(PhysicsShape otherShape, HitResult hitResult)
     {
         foreach (IBeginOverlap beginOverlapListener in beginOverlapListeners)
         {
             beginOverlapListener.OnBeginOverlap(otherShape, hitResult);
+        }
+    }
+
+    public virtual void OnOverlap(PhysicsShape otherShape, HitResult hitResult)
+    {
+        foreach (IOverlap overlapListener in overlapListeners)
+        {
+            overlapListener.OnOverlap(otherShape, hitResult);
+        }
+    }
+
+    public virtual bool TryOnEndOverlap(PhysicsShape otherShape)
+    {
+        if (!overlapShapes.ContainsKey(otherShape)) return false;
+
+        OnEndOverlap(otherShape, overlapShapes[otherShape]);
+        overlapShapes.Remove(otherShape);
+
+        return true;
+    }
+
+    protected virtual void OnEndOverlap(PhysicsShape otherShape, HitResult hitResult)
+    {
+        foreach (IEndOverlap endOverlapListener in endOverlapListeners)
+        {
+            endOverlapListener.OnEndOverlap(otherShape, hitResult);
+        }
+    }
+
+    public virtual bool TryOnBeginHit(PhysicsShape otherShape, HitResult hitResult)
+    {
+        if (hitShapes.ContainsKey(otherShape)) return false;
+
+        OnBeginHit(otherShape, hitResult);
+        hitShapes.Add(otherShape, hitResult);
+
+        return true;
+    }
+
+    protected virtual void OnBeginHit(PhysicsShape otherShape, HitResult hitResult)
+    {
+        foreach (IBeginHit beginHitListener in beginHitListeners)
+        {
+            beginHitListener.OnBeginHit(otherShape, hitResult);
         }
     }
 
@@ -61,17 +123,22 @@ public abstract class PhysicsShape : MonoBehaviour
         }
     }
 
-    public virtual void DrawCollision(float duration)
+    public virtual bool TryOnEndHit(PhysicsShape otherShape)
     {
-        if (CurrentDrawCollisionCoroutine != null) StopCoroutine(CurrentDrawCollisionCoroutine);
-        CurrentDrawCollisionCoroutine = StartCoroutine(DrawCollisionCoroutine(duration));
+        if (!hitShapes.ContainsKey(otherShape)) return false;
+
+        OnEndHit(otherShape, hitShapes[otherShape]);
+        hitShapes.Remove(otherShape);
+
+        return true;
     }
 
-    protected virtual IEnumerator DrawCollisionCoroutine(float duration)
+    protected virtual void OnEndHit(PhysicsShape otherShape, HitResult hitResult)
     {
-        isOverlapping = true;
-        yield return new WaitForSeconds(duration);
-        isOverlapping = false;
+        foreach (IEndHit endHitListener in endHitListeners)
+        {
+            endHitListener.OnEndHit(otherShape, hitResult);
+        }
     }
 
     public abstract SurfacePoint GetClosestPoint(Vector3 otherPoint);
