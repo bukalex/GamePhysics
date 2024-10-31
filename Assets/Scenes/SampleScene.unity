@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -170,6 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31a641e3750524f4287080086e250412, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsStatic: 0
   drag: 0
   mass: 1
 --- !u!23 &145855459
@@ -284,6 +285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31a641e3750524f4287080086e250412, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsStatic: 0
   drag: 0
   mass: 1
 --- !u!23 &270222629
@@ -445,53 +447,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &923372545
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 923372546}
-  - component: {fileID: 923372547}
-  m_Layer: 0
-  m_Name: Cannon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &923372546
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 923372545}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &923372547
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 923372545}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 382e92d51a0423b4e8448460cf36518a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 6092494152328289625, guid: 85f381e65d5aa5149b3a81111cdc425c, type: 3}
-  launchAngle: 30
-  launchSpeed: 10
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,7 +555,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1536456826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -613,7 +568,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 144caea7cc0345a46b839eacf925201d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isTrigger: 1
+  isTrigger: 0
   offset: {x: 0, y: 0, z: 0}
 --- !u!4 &1536456827
 Transform:
@@ -648,7 +603,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1680870105
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -786,6 +741,7 @@ GameObject:
   - component: {fileID: 2056602714}
   - component: {fileID: 2056602713}
   - component: {fileID: 2056602712}
+  - component: {fileID: 2056602715}
   - component: {fileID: 2056602711}
   m_Layer: 0
   m_Name: Sphere (3)
@@ -806,7 +762,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isTrigger: 1
+  isTrigger: 0
   offset: {x: 0, y: 0, z: 0}
   radius: 0.5
 --- !u!23 &2056602712
@@ -874,6 +830,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2056602715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056602710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a641e3750524f4287080086e250412, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsStatic: 1
+  drag: 0
+  mass: 1
 --- !u!23 &535671808343495161
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -928,6 +899,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31a641e3750524f4287080086e250412, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsStatic: 0
   drag: 0
   mass: 1
 --- !u!33 &2227081024595021161
@@ -998,7 +970,6 @@ SceneRoots:
   - {fileID: 270222631}
   - {fileID: 145855461}
   - {fileID: 2056602714}
-  - {fileID: 923372546}
   - {fileID: 1680870108}
   - {fileID: 1718132819}
   - {fileID: 1536456827}

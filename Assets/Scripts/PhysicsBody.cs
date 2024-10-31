@@ -38,6 +38,7 @@ public class PhysicsBody : MonoBehaviour
             mass = value > 0 ? value : 0.001f;
         }
     }
+    public bool IsStatic = false;
 
     [SerializeField]
     [Min(0)]
@@ -66,5 +67,6 @@ public class PhysicsBody : MonoBehaviour
     public void ApplyPendingVelocity()
     {
         Velocity = pendingVelocity;
+        pendingVelocity = Vector3.zero;
     }
 }
