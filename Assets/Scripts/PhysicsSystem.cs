@@ -39,8 +39,6 @@ public class PhysicsSystem : MonoBehaviour
             return;
         }
 
-        RunCollisionChecks();
-
         foreach (PhysicsBody physicsBody in physicsBodies)
         {
             if (!physicsBody) continue;
@@ -50,6 +48,8 @@ public class PhysicsSystem : MonoBehaviour
             ApplyDamping(physicsBody);
             ApplyVelocity(physicsBody);
         }
+
+        RunCollisionChecks();
     }
 
     #region Registration
@@ -158,9 +158,9 @@ public class PhysicsSystem : MonoBehaviour
                     {
                         PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
+                        ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
-                        ApplyMinimumTranslation(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
 
                         if (physicsShapes[shapeA].Body) physicsShapes[shapeA].Body.ApplyPendingVelocity();
                         if (physicsShapes[shapeB].Body) physicsShapes[shapeB].Body.ApplyPendingVelocity();
@@ -243,9 +243,18 @@ public class PhysicsSystem : MonoBehaviour
         targetBody.SaveVelocity(pendingVelocityTarget);
     }
 
-    private static void ApplyMinimumTranslation(PhysicsBody targetBody, PhysicsBody hitBody, HitResult hitResult)
+    private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB, HitResult hitResult)
     {
+        bool canShapeAMove = shapeA.Body && !shapeA.Body.IsStatic;
+        bool canShapeBMove = shapeB.Body && !shapeB.Body.IsStatic;
 
+        if (!canShapeAMove && !canShapeBMove) return;
+
+        SurfacePoint pointA = shapeA.GetClosestPoint(hitResult.impactPoint);
+        SurfacePoint pointB = shapeB.GetClosestPoint(hitResult.impactPoint);
+
+        if (canShapeAMove) shapeA.Body.Position += (pointB.position - pointA.position) * (canShapeBMove ? 0.5f : 1);
+        if (canShapeBMove) shapeB.Body.Position += (pointA.position - pointB.position) * (canShapeAMove ? 0.5f : 1);
     }
 
     private static void PrintLog(string log)
