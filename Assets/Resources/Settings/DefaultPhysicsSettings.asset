@@ -16,3 +16,5 @@ MonoBehaviour:
   gravity: {x: 0, y: -9.8, z: 0}
   deadZone: -25
   enableLogs: 0
+  callOverlapAtFirstFrame: 0
+  callHitAtFirstFrame: 0

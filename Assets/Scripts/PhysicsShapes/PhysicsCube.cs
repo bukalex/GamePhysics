@@ -31,6 +31,11 @@ public class PhysicsCube : PhysicsShape
             Mathf.Abs(localPosition.z) <= size.z;
     }
 
+    public override Vector3 GetOppositePoint(Vector3 otherPoint, Vector3 direction = default)
+    {
+        return otherPoint + (Position - otherPoint) * 2;
+    }
+
     protected override void DrawWireShape()
     {
         Gizmos.matrix = Matrix4x4.TRS(Position, transform.rotation, Vector3.one);

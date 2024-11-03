@@ -250,11 +250,20 @@ public class PhysicsSystem : MonoBehaviour
 
         if (!canShapeAMove && !canShapeBMove) return;
 
-        SurfacePoint pointA = shapeA.GetClosestPoint(hitResult.impactPoint);
-        SurfacePoint pointB = shapeB.GetClosestPoint(hitResult.impactPoint);
+        Vector3 pointA = shapeA.GetClosestPoint(hitResult.impactPoint).position;
+        Vector3 pointB = shapeB.GetClosestPoint(hitResult.impactPoint).position;
 
-        if (canShapeAMove) shapeA.Body.Position += (pointB.position - pointA.position) * (canShapeBMove ? 0.5f : 1);
-        if (canShapeBMove) shapeB.Body.Position += (pointA.position - pointB.position) * (canShapeAMove ? 0.5f : 1);
+        if (shapeA.IsPointInside(shapeB.Position))
+        {
+            pointB = shapeB.GetOppositePoint(pointB, hitResult.impactNormal);
+        }
+        else if (shapeB.IsPointInside(shapeA.Position))
+        {
+            pointA = shapeA.GetOppositePoint(pointA, hitResult.impactNormal);
+        }
+
+        if (canShapeAMove) shapeA.Body.Position += (pointB - pointA) * (canShapeBMove ? 0.5f : 1);
+        if (canShapeBMove) shapeB.Body.Position += (pointA - pointB) * (canShapeAMove ? 0.5f : 1);
     }
 
     private static void PrintLog(string log)

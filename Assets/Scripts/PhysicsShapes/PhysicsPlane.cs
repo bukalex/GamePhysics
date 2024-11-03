@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 public class PhysicsPlane : PhysicsShape
@@ -25,6 +26,11 @@ public class PhysicsPlane : PhysicsShape
     public override bool IsPointInside(Vector3 point)
     {
         return Vector3.Dot(Normal, point - Position) == 0;
+    }
+
+    public override Vector3 GetOppositePoint(Vector3 otherPoint, Vector3 direction = default)
+    {
+        return otherPoint + Vector3.Dot(Normal, Position - otherPoint) * Normal * 2;
     }
 
     protected override void DrawWireShape()

@@ -23,6 +23,18 @@ public class PhysicsSphere : PhysicsShape
         return Vector3.Distance(Position, point) <= radius;
     }
 
+    public override Vector3 GetOppositePoint(Vector3 otherPoint, Vector3 direction = default)
+    {
+        if (direction == Vector3.zero) return otherPoint + (Position - otherPoint) * 2;
+        else
+        {
+            Vector3 vector = otherPoint - Position;
+            float alpha = Vector3.Angle(vector, direction);
+
+            return Position + Quaternion.AngleAxis(180 - alpha * 2, Vector3.Cross(direction, vector)) * vector;
+        }
+    }
+
     protected override void DrawWireShape()
     {
         Gizmos.DrawWireSphere(Position, radius);
