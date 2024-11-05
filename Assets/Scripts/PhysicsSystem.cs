@@ -223,7 +223,7 @@ public class PhysicsSystem : MonoBehaviour
     private static void ApplyCollisionResponse(PhysicsBody targetBody, PhysicsBody hitBody, HitResult hitResult)
     {
         if (!targetBody || targetBody.IsStatic) return;
-
+        
         Vector3 projectionOnPlaneTarget = Vector3.ProjectOnPlane(targetBody.Velocity, hitResult.impactNormal);
         Vector3 projectionOnNormalTarget = Vector3.Project(targetBody.Velocity, hitResult.impactNormal);
         Vector3 pendingVelocityTarget;
@@ -252,7 +252,7 @@ public class PhysicsSystem : MonoBehaviour
 
         Vector3 pointA = shapeA.GetClosestPoint(hitResult.impactPoint).position;
         Vector3 pointB = shapeB.GetClosestPoint(hitResult.impactPoint).position;
-
+        
         if (shapeA.IsPointInside(shapeB.Position))
         {
             pointB = shapeB.GetOppositePoint(pointB, hitResult.impactNormal);

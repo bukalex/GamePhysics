@@ -11,7 +11,7 @@ public class PhysicsCube : PhysicsShape
     {
         SurfacePoint point = default;
 
-        Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (otherPoint - Position);
+        Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (otherPoint - Position).normalized * size.magnitude;
         point.position = Position + transform.rotation * new Vector3(
             Mathf.Clamp(localPosition.x, -size.x, size.x), 
             Mathf.Clamp(localPosition.y, -size.y, size.y), 
