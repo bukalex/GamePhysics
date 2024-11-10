@@ -47,10 +47,17 @@ public class PhysicsSystem : MonoBehaviour
 
             ApplyGravity(physicsBody);
             ApplyDamping(physicsBody);
-            ApplyVelocity(physicsBody);
         }
 
         RunCollisionChecks();
+
+        foreach (PhysicsBody physicsBody in physicsBodies)
+        {
+            if (!physicsBody) continue;
+            if (!physicsBody.isActiveAndEnabled) continue;
+
+            ApplyVelocity(physicsBody);
+        }
     }
 
     #region Registration
