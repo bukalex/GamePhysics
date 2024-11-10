@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class PhysicsSystem : MonoBehaviour
 {
@@ -158,7 +159,7 @@ public class PhysicsSystem : MonoBehaviour
                     {
                         PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
-                        ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
+                        ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA]);
                         ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
 
@@ -243,27 +244,42 @@ public class PhysicsSystem : MonoBehaviour
         targetBody.SaveVelocity(pendingVelocityTarget);
     }
 
-    private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB, HitResult hitResult)
+    private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB)
     {
         bool canShapeAMove = shapeA.Body && !shapeA.Body.IsStatic;
         bool canShapeBMove = shapeB.Body && !shapeB.Body.IsStatic;
 
         if (!canShapeAMove && !canShapeBMove) return;
 
-        Vector3 pointA = shapeA.GetClosestPoint(hitResult.impactPoint).position;
-        Vector3 pointB = shapeB.GetClosestPoint(hitResult.impactPoint).position;
+        SurfacePoint pointA = shapeA.GetClosestPoint(shapeB.Position);
+        SurfacePoint pointB = shapeB.GetClosestPoint(shapeA.Position);
         
-        if (shapeA.IsPointInside(shapeB.Position))
+        Vector3 AB = pointB.position - pointA.position;
+        Vector3 Displacement = AB;
+
+        float ABAngle = Vector3.Angle(pointA.normal, pointB.normal);
+        float maxAngle = 5;
+
+        if (maxAngle < ABAngle && ABAngle < (180 - maxAngle))
         {
-            pointB = shapeB.GetOppositePoint(pointB, hitResult.impactNormal);
-        }
-        else if (shapeB.IsPointInside(shapeA.Position))
-        {
-            pointA = shapeA.GetOppositePoint(pointA, hitResult.impactNormal);
+            SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
+            SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
+
+            float A2BAngle = Vector3.Angle(pointA2.normal, pointB.normal);
+            float AB2Angle = Vector3.Angle(pointA.normal, pointB2.normal);
+
+            if (A2BAngle <= maxAngle || (180 - maxAngle) <= A2BAngle)
+            {
+                Displacement = pointB.position - pointA2.position;
+            }
+            else if (AB2Angle <= maxAngle || (180 - maxAngle) <= AB2Angle)
+            {
+                Displacement = pointB2.position - pointA.position;
+            }
         }
 
-        if (canShapeAMove) shapeA.Body.Position += (pointB - pointA) * (canShapeBMove ? 0.5f : 1);
-        if (canShapeBMove) shapeB.Body.Position += (pointA - pointB) * (canShapeAMove ? 0.5f : 1);
+        if (canShapeAMove) shapeA.Body.Position += Displacement * (canShapeBMove ? 0.5f : 1);
+        if (canShapeBMove) shapeB.Body.Position += -Displacement * (canShapeAMove ? 0.5f : 1);
     }
 
     private static void PrintLog(string log)
