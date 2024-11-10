@@ -160,8 +160,8 @@ public class PhysicsSystem : MonoBehaviour
                         PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
                         ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA]);
-                        ApplyCollisionResponse(physicsShapes[shapeA].Body, physicsShapes[shapeB].Body, hitResult);
-                        ApplyCollisionResponse(physicsShapes[shapeB].Body, physicsShapes[shapeA].Body, hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeA], physicsShapes[shapeB], hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
 
                         if (physicsShapes[shapeA].Body) physicsShapes[shapeA].Body.ApplyPendingVelocity();
                         if (physicsShapes[shapeB].Body) physicsShapes[shapeB].Body.ApplyPendingVelocity();
@@ -221,27 +221,74 @@ public class PhysicsSystem : MonoBehaviour
         return false;
     }
 
-    private static void ApplyCollisionResponse(PhysicsBody targetBody, PhysicsBody hitBody, HitResult hitResult)
+    private static void ApplyCollisionResponse(PhysicsShape targetShape, PhysicsShape hitShape, HitResult hitResult)
     {
-        if (!targetBody || targetBody.IsStatic) return;
+        if (!targetShape || !targetShape.Body || targetShape.Body.IsStatic) return;
         
-        Vector3 projectionOnPlaneTarget = Vector3.ProjectOnPlane(targetBody.Velocity, hitResult.impactNormal);
-        Vector3 projectionOnNormalTarget = Vector3.Project(targetBody.Velocity, hitResult.impactNormal);
+        Vector3 projectionOnPlaneTarget = Vector3.ProjectOnPlane(targetShape.Body.Velocity, hitResult.impactNormal);
+        Vector3 projectionOnNormalTarget = Vector3.Project(targetShape.Body.Velocity, hitResult.impactNormal);
         Vector3 pendingVelocityTarget;
 
-        if (hitBody && !hitBody.IsStatic)
+        #region Friction
+        float dynamicFriction = 1;
+        switch (Settings.frictionMode)
         {
-            Vector3 projectionOnNormalHit = Vector3.Project(hitBody.Velocity, hitResult.impactNormal);
-            pendingVelocityTarget = projectionOnPlaneTarget +
-                (2 * hitBody.Mass * projectionOnNormalHit + projectionOnNormalTarget * (targetBody.Mass - hitBody.Mass)) /
-                (targetBody.Mass + hitBody.Mass);
+            case CoefficientBlendMode.Add:
+                dynamicFriction = targetShape.dynamicFriction + hitShape.dynamicFriction;
+                break;
+
+            case CoefficientBlendMode.Multiply:
+                dynamicFriction = targetShape.dynamicFriction * hitShape.dynamicFriction;
+                break;
+
+            case CoefficientBlendMode.Average:
+                dynamicFriction = (targetShape.dynamicFriction + hitShape.dynamicFriction) / 2;
+                break;
+        }
+
+        float alpha = Vector3.Angle(hitResult.impactNormal, Settings.gravity) * Mathf.Deg2Rad;
+        float normalForceMagnitude = targetShape.Body.Mass * Settings.gravity.magnitude * Mathf.Abs(Mathf.Cos(alpha));
+        Vector3 frictionForce = -projectionOnPlaneTarget.normalized * normalForceMagnitude * dynamicFriction;
+
+        projectionOnPlaneTarget += frictionForce / targetShape.Body.Mass * Time.fixedDeltaTime;
+        if (Vector3.Dot(projectionOnPlaneTarget, frictionForce) > 0) projectionOnPlaneTarget = Vector3.zero;
+
+        Debug.DrawLine(targetShape.Position, targetShape.Position - projectionOnNormalTarget.normalized * normalForceMagnitude, Color.green);
+        Debug.DrawLine(targetShape.Position, targetShape.Position + frictionForce, Color.yellow);
+        Debug.DrawLine(targetShape.Position, targetShape.Position + targetShape.Body.Mass * Settings.gravity, Color.magenta);
+        #endregion
+
+        #region Bounce
+        float bounce = 1;
+        switch (Settings.bounceMode)
+        {
+            case CoefficientBlendMode.Add:
+                bounce = targetShape.bounce + hitShape.bounce;
+                break;
+
+            case CoefficientBlendMode.Multiply:
+                bounce = targetShape.bounce * hitShape.bounce;
+                break;
+
+            case CoefficientBlendMode.Average:
+                bounce = (targetShape.bounce + hitShape.bounce) / 2;
+                break;
+        }
+
+        if (hitShape && hitShape.Body && !hitShape.Body.IsStatic)
+        {
+            Vector3 projectionOnNormalHit = Vector3.Project(hitShape.Body.Velocity, hitResult.impactNormal);
+            pendingVelocityTarget = projectionOnPlaneTarget + bounce *
+                (2 * hitShape.Body.Mass * projectionOnNormalHit + projectionOnNormalTarget * (targetShape.Body.Mass - hitShape.Body.Mass)) /
+                (targetShape.Body.Mass + hitShape.Body.Mass);
         }
         else
         {
-            pendingVelocityTarget = projectionOnPlaneTarget - projectionOnNormalTarget;
+            pendingVelocityTarget = projectionOnPlaneTarget - projectionOnNormalTarget * bounce;
         }
+        #endregion
 
-        targetBody.SaveVelocity(pendingVelocityTarget);
+        targetShape.Body.SaveVelocity(pendingVelocityTarget);
     }
 
     private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB)

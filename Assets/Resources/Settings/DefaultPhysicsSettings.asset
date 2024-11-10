@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isEnabled: 1
   gravity: {x: 0, y: -9.8, z: 0}
-  deadZone: -25
+  deadZone: -50
   enableLogs: 0
   callOverlapAtFirstFrame: 0
   callHitAtFirstFrame: 0
+  frictionMode: 1
+  bounceMode: 1

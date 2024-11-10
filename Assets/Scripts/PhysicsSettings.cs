@@ -43,9 +43,18 @@ public class PhysicsSettings : ScriptableObject
     public bool enableLogs = false;
     public bool callOverlapAtFirstFrame = false;
     public bool callHitAtFirstFrame = false;
+    public CoefficientBlendMode frictionMode = CoefficientBlendMode.Average;
+    public CoefficientBlendMode bounceMode = CoefficientBlendMode.Average;
 
     private static void FindSettingsAssets()
     {
         allSettings = Resources.LoadAll<PhysicsSettings>(path);
     }
+}
+
+public enum CoefficientBlendMode
+{
+    Add,
+    Multiply,
+    Average
 }

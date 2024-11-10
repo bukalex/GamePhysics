@@ -14,6 +14,12 @@ public abstract class PhysicsShape : MonoBehaviour
     }
 
     public bool isTrigger = false;
+    [Min(0)]
+    public float staticFriction = 0.5f;
+    [Min(0)]
+    public float dynamicFriction = 0.3f;
+    [Range(0, 1)]
+    public float bounce = 0.7f;
 
     [SerializeField]
     protected Vector3 offset;
