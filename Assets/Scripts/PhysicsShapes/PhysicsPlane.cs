@@ -28,11 +28,6 @@ public class PhysicsPlane : PhysicsShape
         return Vector3.Dot(Normal, point - Position) == 0;
     }
 
-    public override Vector3 GetOppositePoint(Vector3 otherPoint, Vector3 direction = default)
-    {
-        return otherPoint + Vector3.Dot(Normal, Position - otherPoint) * Normal * 2;
-    }
-
     protected override void DrawWireShape()
     {
         Gizmos.DrawLine(Position, Position + Normal);

@@ -43,8 +43,11 @@ public class PhysicsSystem : MonoBehaviour
         {
             if (!physicsBody) continue;
             if (!physicsBody.isActiveAndEnabled) continue;
+            if (physicsBody.IsStatic) continue;
 
             ApplyGravity(physicsBody);
+            ApplyTorque(physicsBody);
+            ApplyAngularVelocity(physicsBody);
             ApplyForce(physicsBody);
             ApplyDamping(physicsBody);
             ApplyVelocity(physicsBody);
@@ -105,33 +108,52 @@ public class PhysicsSystem : MonoBehaviour
 
     private static void ApplyGravity(PhysicsBody physicsBody)
     {
-        if (physicsBody.IsStatic) return;
+        physicsBody.AddForce(Settings.gravity * physicsBody.Mass);
+    }
 
-        physicsBody.Force += Settings.gravity * physicsBody.Mass;
+    private static void ApplyTorque(PhysicsBody physicsBody)
+    {
+        if (physicsBody.Torque.magnitude > 0)
+        {
+            physicsBody.AngularVelocity += (physicsBody.Torque / physicsBody.AngularDrag) * Time.fixedDeltaTime;
+            physicsBody.SetTorque();
+        }
+        else
+        {
+            physicsBody.AngularVelocity +=
+                -physicsBody.AngularVelocity.normalized *
+                physicsBody.AngularDrag * Mathf.Pow(physicsBody.AngularVelocity.magnitude, 2) *
+                Time.fixedDeltaTime;
+
+            if (physicsBody.AngularVelocity.magnitude * Time.fixedDeltaTime < Settings.rotationThreshold / physicsBody.AngularDrag)
+            {
+                physicsBody.AngularVelocity = Vector3.zero;
+            }
+        }
+    }
+
+    private static void ApplyAngularVelocity(PhysicsBody physicsBody)
+    {
+        physicsBody.Rotation *= Quaternion.AngleAxis(physicsBody.AngularVelocity.magnitude * Time.fixedDeltaTime, physicsBody.AngularVelocity.normalized);
+    }
+
+    private static void ApplyForce(PhysicsBody physicsBody)
+    {
+        physicsBody.Velocity += (physicsBody.Force / physicsBody.Mass) * Time.fixedDeltaTime;
+        physicsBody.SetForce();
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
     {
-        if (physicsBody.IsStatic) return;
-
         physicsBody.Velocity += 
             -physicsBody.Velocity.normalized * 
             physicsBody.Drag * Mathf.Pow(physicsBody.Velocity.magnitude, 2) * 
             Time.fixedDeltaTime;
     }
 
-    private static void ApplyForce(PhysicsBody physicsBody)
-    {
-        if (physicsBody.IsStatic) return;
-
-        physicsBody.Velocity += (physicsBody.Force / physicsBody.Mass) * Time.fixedDeltaTime;
-        physicsBody.Force = Vector3.zero;
-    }
-
     private static void ApplyVelocity(PhysicsBody physicsBody)
     {
-        if (physicsBody.IsStatic) return;
-        if (physicsBody.Velocity.magnitude < Settings.velocityThreshold) return;
+        if (physicsBody.Velocity.magnitude < Settings.movementThreshold) return;
 
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
@@ -250,7 +272,7 @@ public class PhysicsSystem : MonoBehaviour
         }
 
         Vector3 Fnorm = (VnormResTarget - VnormTarget) * targetShape.Body.Mass / Time.fixedDeltaTime;
-        targetShape.Body.Force += Fnorm;
+        targetShape.Body.AddForce(Fnorm, hitResult.impactPoint);
         #endregion
 
         #region Friction
@@ -262,9 +284,12 @@ public class PhysicsSystem : MonoBehaviour
         if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
         {
             Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime);
+            targetShape.Body.AddForce(Ffr);
         }
-
-        targetShape.Body.Force += Ffr;
+        else
+        {
+            targetShape.Body.AddForce(Ffr, hitResult.impactPoint);
+        }
         #endregion
     }
 
@@ -277,7 +302,7 @@ public class PhysicsSystem : MonoBehaviour
 
         SurfacePoint pointA = shapeA.GetClosestPoint(shapeB.Position);
         SurfacePoint pointB = shapeB.GetClosestPoint(shapeA.Position);
-        
+
         Vector3 AB = pointB.position - pointA.position;
         Vector3 Displacement = AB;
 

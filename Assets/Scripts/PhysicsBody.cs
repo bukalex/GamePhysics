@@ -16,7 +16,31 @@ public class PhysicsBody : MonoBehaviour
         }
     }
     public Vector3 Velocity { get; set; }
-    public Vector3 Force { get; set; }
+    public Vector3 Force { get; private set; }
+    public Vector3 AngularVelocity { get; set; }
+    public Vector3 Torque { get; private set; }
+    public Quaternion Rotation
+    {
+        get
+        {
+            return transform.rotation;
+        }
+        set
+        {
+            transform.rotation = value;
+        }
+    }
+    public float AngularDrag
+    {
+        get
+        {
+            return angularDrag;
+        }
+        set
+        {
+            angularDrag = value > 0 ? value : 0.001f;
+        }
+    }
     public float Drag
     {
         get
@@ -46,7 +70,10 @@ public class PhysicsBody : MonoBehaviour
     private float drag;
     [SerializeField]
     [Min(0.001f)]
-    private float mass;
+    private float angularDrag = 1;
+    [SerializeField]
+    [Min(0.001f)]
+    private float mass = 1;
 
     private void Awake()
     {
@@ -56,5 +83,28 @@ public class PhysicsBody : MonoBehaviour
     private void OnDestroy()
     {
         PhysicsSystem.UnregisterPhysicsBody(this);
+    }
+
+    public void AddForce(Vector3 force)
+    {
+        Force += force;
+    }
+
+    public void AddForce(Vector3 force, Vector3 position)
+    {
+        Vector3 distance = position - Position;
+
+        Force += force;
+        Torque += Vector3.Cross(distance, force);
+    }
+
+    public void SetForce(Vector3 force = default)
+    {
+        Force = force;
+    }
+
+    public void SetTorque(Vector3 torque = default)
+    {
+        Torque = torque;
     }
 }

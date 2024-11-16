@@ -149,7 +149,6 @@ public abstract class PhysicsShape : MonoBehaviour
 
     public abstract SurfacePoint GetClosestPoint(Vector3 otherPoint);
     public abstract bool IsPointInside(Vector3 point);
-    public abstract Vector3 GetOppositePoint(Vector3 otherPoint, Vector3 direction = default);
     protected abstract void DrawWireShape();
 }
 
