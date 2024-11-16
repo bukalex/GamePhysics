@@ -40,6 +40,7 @@ public class PhysicsSettings : ScriptableObject
 
     public Vector3 gravity = new Vector3(0, -9.8f, 0);
     public float deadZone = -25;
+    public float velocityThreshold = 0.001f;
     public bool enableLogs = false;
     public bool callOverlapAtFirstFrame = false;
     public bool callHitAtFirstFrame = false;

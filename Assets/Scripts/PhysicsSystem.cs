@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 
 public class PhysicsSystem : MonoBehaviour
 {
@@ -46,6 +45,7 @@ public class PhysicsSystem : MonoBehaviour
             if (!physicsBody.isActiveAndEnabled) continue;
 
             ApplyGravity(physicsBody);
+            ApplyForce(physicsBody);
             ApplyDamping(physicsBody);
             ApplyVelocity(physicsBody);
         }
@@ -107,7 +107,7 @@ public class PhysicsSystem : MonoBehaviour
     {
         if (physicsBody.IsStatic) return;
 
-        physicsBody.Velocity += Settings.gravity * Time.fixedDeltaTime;
+        physicsBody.Force += Settings.gravity * physicsBody.Mass;
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
@@ -120,9 +120,18 @@ public class PhysicsSystem : MonoBehaviour
             Time.fixedDeltaTime;
     }
 
+    private static void ApplyForce(PhysicsBody physicsBody)
+    {
+        if (physicsBody.IsStatic) return;
+
+        physicsBody.Velocity += (physicsBody.Force / physicsBody.Mass) * Time.fixedDeltaTime;
+        physicsBody.Force = Vector3.zero;
+    }
+
     private static void ApplyVelocity(PhysicsBody physicsBody)
     {
         if (physicsBody.IsStatic) return;
+        if (physicsBody.Velocity.magnitude < Settings.velocityThreshold) return;
 
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
@@ -162,9 +171,6 @@ public class PhysicsSystem : MonoBehaviour
                         ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA]);
                         ApplyCollisionResponse(physicsShapes[shapeA], physicsShapes[shapeB], hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
-
-                        if (physicsShapes[shapeA].Body) physicsShapes[shapeA].Body.ApplyPendingVelocity();
-                        if (physicsShapes[shapeB].Body) physicsShapes[shapeB].Body.ApplyPendingVelocity();
 
                         if (!physicsShapes[shapeA].TryOnBeginHit(physicsShapes[shapeB], hitResult) || Settings.callHitAtFirstFrame)
                         {
@@ -225,66 +231,41 @@ public class PhysicsSystem : MonoBehaviour
     {
         if (!targetShape || !targetShape.Body || targetShape.Body.IsStatic) return;
         
-        Vector3 projectionOnPlaneTarget = Vector3.ProjectOnPlane(targetShape.Body.Velocity, hitResult.impactNormal);
-        Vector3 projectionOnNormalTarget = Vector3.Project(targetShape.Body.Velocity, hitResult.impactNormal);
-        Vector3 pendingVelocityTarget;
-
-        #region Friction
-        float dynamicFriction = 1;
-        switch (Settings.frictionMode)
-        {
-            case CoefficientBlendMode.Add:
-                dynamicFriction = targetShape.dynamicFriction + hitShape.dynamicFriction;
-                break;
-
-            case CoefficientBlendMode.Multiply:
-                dynamicFriction = targetShape.dynamicFriction * hitShape.dynamicFriction;
-                break;
-
-            case CoefficientBlendMode.Average:
-                dynamicFriction = (targetShape.dynamicFriction + hitShape.dynamicFriction) / 2;
-                break;
-        }
-
-        float alpha = Vector3.Angle(hitResult.impactNormal, Settings.gravity) * Mathf.Deg2Rad;
-        float normalForceMagnitude = targetShape.Body.Mass * Settings.gravity.magnitude * Mathf.Abs(Mathf.Cos(alpha));
-        Vector3 frictionForce = -projectionOnPlaneTarget.normalized * normalForceMagnitude * dynamicFriction;
-
-        projectionOnPlaneTarget += frictionForce / targetShape.Body.Mass * Time.fixedDeltaTime;
-        if (Vector3.Dot(projectionOnPlaneTarget, frictionForce) > 0) projectionOnPlaneTarget = Vector3.zero;
-        #endregion
+        Vector3 VplaneTarget = Vector3.ProjectOnPlane(targetShape.Body.Velocity, hitResult.impactNormal);
+        Vector3 VnormTarget = Vector3.Project(targetShape.Body.Velocity, hitResult.impactNormal);
+        Vector3 VnormResTarget;
 
         #region Bounce
-        float bounce = 1;
-        switch (Settings.bounceMode)
-        {
-            case CoefficientBlendMode.Add:
-                bounce = targetShape.bounce + hitShape.bounce;
-                break;
-
-            case CoefficientBlendMode.Multiply:
-                bounce = targetShape.bounce * hitShape.bounce;
-                break;
-
-            case CoefficientBlendMode.Average:
-                bounce = (targetShape.bounce + hitShape.bounce) / 2;
-                break;
-        }
+        float bounce = GetCoefficient(targetShape.bounce, hitShape.bounce, Settings.bounceMode);
 
         if (hitShape && hitShape.Body && !hitShape.Body.IsStatic)
         {
-            Vector3 projectionOnNormalHit = Vector3.Project(hitShape.Body.Velocity, hitResult.impactNormal);
-            pendingVelocityTarget = projectionOnPlaneTarget + bounce *
-                (2 * hitShape.Body.Mass * projectionOnNormalHit + projectionOnNormalTarget * (targetShape.Body.Mass - hitShape.Body.Mass)) /
+            Vector3 VnHit = Vector3.Project(hitShape.Body.Velocity, hitResult.impactNormal);
+            VnormResTarget = bounce * (2 * hitShape.Body.Mass * VnHit + VnormTarget * (targetShape.Body.Mass - hitShape.Body.Mass)) /
                 (targetShape.Body.Mass + hitShape.Body.Mass);
         }
         else
         {
-            pendingVelocityTarget = projectionOnPlaneTarget - projectionOnNormalTarget * bounce;
+            VnormResTarget = -VnormTarget * bounce;
         }
+
+        Vector3 Fnorm = (VnormResTarget - VnormTarget) * targetShape.Body.Mass / Time.fixedDeltaTime;
+        targetShape.Body.Force += Fnorm;
         #endregion
 
-        targetShape.Body.SaveVelocity(pendingVelocityTarget);
+        #region Friction
+        float dynamicFriction = GetCoefficient(targetShape.dynamicFriction, hitShape.dynamicFriction, Settings.frictionMode);
+
+        Vector3 Fplane = Vector3.ProjectOnPlane(targetShape.Body.Force, hitResult.impactNormal);
+        Vector3 Ffr = -VplaneTarget.normalized * Fnorm.magnitude * dynamicFriction;
+
+        if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
+        {
+            Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime);
+        }
+
+        targetShape.Body.Force += Ffr;
+        #endregion
     }
 
     private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB)
@@ -337,6 +318,24 @@ public class PhysicsSystem : MonoBehaviour
     {
         if (!Settings) Debug.LogWarning("No physics settings enabled.");
         else if (Settings.enableLogs) Debug.Log(log);
+    }
+
+    private static float GetCoefficient(float factor1, float factor2, CoefficientBlendMode mode)
+    {
+        switch (mode)
+        {
+            case CoefficientBlendMode.Add:
+                return factor1 + factor2;
+
+            case CoefficientBlendMode.Multiply:
+                return factor1 * factor2;
+
+            case CoefficientBlendMode.Average:
+                return (factor1 + factor2) / 2;
+
+            default:
+                return 1;
+        }
     }
 }
 
