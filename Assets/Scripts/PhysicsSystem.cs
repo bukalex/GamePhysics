@@ -47,17 +47,10 @@ public class PhysicsSystem : MonoBehaviour
 
             ApplyGravity(physicsBody);
             ApplyDamping(physicsBody);
+            ApplyVelocity(physicsBody);
         }
 
         RunCollisionChecks();
-
-        foreach (PhysicsBody physicsBody in physicsBodies)
-        {
-            if (!physicsBody) continue;
-            if (!physicsBody.isActiveAndEnabled) continue;
-
-            ApplyVelocity(physicsBody);
-        }
     }
 
     #region Registration
@@ -259,10 +252,6 @@ public class PhysicsSystem : MonoBehaviour
 
         projectionOnPlaneTarget += frictionForce / targetShape.Body.Mass * Time.fixedDeltaTime;
         if (Vector3.Dot(projectionOnPlaneTarget, frictionForce) > 0) projectionOnPlaneTarget = Vector3.zero;
-
-        Debug.DrawLine(targetShape.Position, targetShape.Position - projectionOnNormalTarget.normalized * normalForceMagnitude, Color.green);
-        Debug.DrawLine(targetShape.Position, targetShape.Position + frictionForce, Color.yellow);
-        Debug.DrawLine(targetShape.Position, targetShape.Position + targetShape.Body.Mass * Settings.gravity, Color.magenta);
         #endregion
 
         #region Bounce
@@ -311,24 +300,32 @@ public class PhysicsSystem : MonoBehaviour
         Vector3 AB = pointB.position - pointA.position;
         Vector3 Displacement = AB;
 
-        float ABAngle = Vector3.Angle(pointA.normal, pointB.normal);
         float maxAngle = 5;
 
-        if (maxAngle < ABAngle && ABAngle < (180 - maxAngle))
+        if (maxAngle < Vector3.Angle(AB, pointB.normal) && Vector3.Angle(AB, pointB.normal) < (180 - maxAngle) ||
+            maxAngle < Vector3.Angle(pointA.normal, AB) && Vector3.Angle(pointA.normal, AB) < (180 - maxAngle))
         {
             SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
             SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
 
-            float A2BAngle = Vector3.Angle(pointA2.normal, pointB.normal);
-            float AB2Angle = Vector3.Angle(pointA.normal, pointB2.normal);
+            Vector3 A2B = pointB.position - pointA2.position;
+            Vector3 AB2 = pointB2.position - pointA.position;
+            Vector3 A2B2 = pointB2.position - pointA2.position;
 
-            if (A2BAngle <= maxAngle || (180 - maxAngle) <= A2BAngle)
+            if ((Vector3.Angle(A2B, pointB.normal) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(A2B, pointB.normal)) &&
+                (Vector3.Angle(pointA2.normal, A2B) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(pointA2.normal, A2B)))
             {
-                Displacement = pointB.position - pointA2.position;
+                Displacement = A2B;
             }
-            else if (AB2Angle <= maxAngle || (180 - maxAngle) <= AB2Angle)
+            else if ((Vector3.Angle(AB2, pointB2.normal) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(AB2, pointB2.normal)) &&
+                     (Vector3.Angle(pointA.normal, AB2) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(pointA.normal, AB2)))
             {
-                Displacement = pointB2.position - pointA.position;
+                Displacement = AB2;
+            }
+            else if ((Vector3.Angle(A2B2, pointB2.normal) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(A2B2, pointB2.normal)) &&
+                     (Vector3.Angle(pointA2.normal, A2B2) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(pointA2.normal, A2B2)))
+            {
+                Displacement = A2B2;
             }
         }
 

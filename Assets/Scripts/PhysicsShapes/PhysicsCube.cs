@@ -11,11 +11,34 @@ public class PhysicsCube : PhysicsShape
     {
         SurfacePoint point = default;
 
-        Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (otherPoint - Position).normalized * size.magnitude;
-        point.position = Position + transform.rotation * new Vector3(
-            Mathf.Clamp(localPosition.x, -size.x, size.x), 
-            Mathf.Clamp(localPosition.y, -size.y, size.y), 
-            Mathf.Clamp(localPosition.z, -size.z, size.z));
+        Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (otherPoint - Position);
+
+        if (IsPointInside(otherPoint))
+        {
+            Vector3 dx = ((localPosition.x >= 0 ? 1 : -1) * size.x - localPosition.x) * Vector3.right;
+            Vector3 dy = ((localPosition.y >= 0 ? 1 : -1) * size.y - localPosition.y) * Vector3.up;
+            Vector3 dz = ((localPosition.z >= 0 ? 1 : -1) * size.z - localPosition.z) * Vector3.forward;
+
+            if (dx.magnitude < dy.magnitude)
+            {
+                if (dx.magnitude < dz.magnitude) localPosition += dx;
+                else localPosition += dz;
+            }
+            else
+            {
+                if (dy.magnitude < dz.magnitude) localPosition += dy;
+                else localPosition += dz;
+            }
+        }
+        else
+        {
+            localPosition = new Vector3(
+                Mathf.Clamp(localPosition.x, -size.x, size.x),
+                Mathf.Clamp(localPosition.y, -size.y, size.y),
+                Mathf.Clamp(localPosition.z, -size.z, size.z));
+        }
+
+        point.position = Position + transform.rotation * localPosition;
         point.normal = (otherPoint - point.position).normalized;
 
         return point;
