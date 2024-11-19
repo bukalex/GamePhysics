@@ -233,38 +233,67 @@ public class PhysicsSystem : MonoBehaviour
         bool isPointAInside = shapeB.IsPointInside(pointA.position);
         bool isPointBInside = shapeA.IsPointInside(pointB.position);
 
-        if (isPointAInside && isPointBInside)
-        {
-            SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
-            SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
+        OverlapCombination combination;
+        if (isPointAInside && isPointBInside) combination = OverlapCombination.Both;
+        else if (isPointAInside) combination = OverlapCombination.PointA;
+        else if (isPointBInside) combination = OverlapCombination.PointB;
+        else combination = OverlapCombination.None;
 
-            if (AreLinesAligned(pointA.normal, pointA2.normal))
-            {
+        switch (combination)
+        {
+            case OverlapCombination.Both:
+                SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
+                SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
+
+                if (AreLinesAligned(pointA.normal, pointA2.normal))
+                {
+                    hitResult.impactPoint = pointA.position;
+                    hitResult.impactNormal = pointA.normal;
+                }
+                else if (AreLinesAligned(pointB.normal, pointB2.normal))
+                {
+                    hitResult.impactPoint = pointB.position;
+                    hitResult.impactNormal = pointB.normal;
+                }
+                else
+                {
+                    hitResult.impactPoint = pointA.position;
+                    hitResult.impactNormal = pointA.normal;
+                }
+
+                return true;
+
+            case OverlapCombination.PointA:
                 hitResult.impactPoint = pointA.position;
                 hitResult.impactNormal = pointA.normal;
-            }
-            else if (AreLinesAligned(pointB.normal, pointB2.normal))
-            {
+
+                return true;
+
+            case OverlapCombination.PointB:
                 hitResult.impactPoint = pointB.position;
                 hitResult.impactNormal = pointB.normal;
-            }
 
-            return true;
-        }
-        else if (isPointAInside)
-        {
-            hitResult.impactPoint = pointA.position;
-            hitResult.impactNormal = pointA.normal;
+                return true;
 
-            return true;
-        }
-        else if (isPointBInside)
-        {
-            hitResult.impactPoint = pointB.position;
-            hitResult.impactNormal = pointB.normal;
+            case OverlapCombination.None:
+                if (shapeA.HasFarthestPoint())
+                {
+                    pointA = shapeA.GetFarthestPoint(pointB.position, pointB.normal, true);
+                    pointB = shapeB.GetClosestPoint(pointA.position);
 
-            return true;
+                    if (shapeA.IsPointInside(pointB.position)) goto case OverlapCombination.PointB;
+                }
+                else if (shapeB.HasFarthestPoint())
+                {
+                    pointB = shapeB.GetFarthestPoint(pointA.position, pointA.normal, true);
+                    pointA = shapeA.GetClosestPoint(pointB.position);
+
+                    if (shapeB.IsPointInside(pointA.position)) goto case OverlapCombination.PointA;
+                }
+
+                break;
         }
+
 
         return false;
     }
@@ -324,8 +353,22 @@ public class PhysicsSystem : MonoBehaviour
         SurfacePoint pointA = default;
         SurfacePoint pointB = default;
 
-        if (shapeA.HasFarthestPoint()) pointA = shapeA.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
-        if (shapeB.HasFarthestPoint()) pointB = shapeB.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
+        if (shapeA.HasFarthestPoint())
+        {
+            if (shapeB.IsPointInside(shapeA.Position))
+            {
+                pointA = shapeA.GetFarthestPoint(hitResult.impactPoint, Vector3.Project(shapeA.Position - hitResult.impactPoint, hitResult.impactNormal));
+            }
+            else pointA = shapeA.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
+        }
+        if (shapeB.HasFarthestPoint())
+        {
+            if (shapeA.IsPointInside(shapeB.Position))
+            {
+                pointB = shapeB.GetFarthestPoint(hitResult.impactPoint, Vector3.Project(shapeB.Position - hitResult.impactPoint, hitResult.impactNormal));
+            }
+            else pointB = shapeB.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
+        }
 
         if (!shapeA.HasFarthestPoint()) pointA = shapeA.GetClosestPoint(pointB.position);
         if (!shapeB.HasFarthestPoint()) pointB = shapeB.GetClosestPoint(pointA.position);
@@ -363,6 +406,14 @@ public class PhysicsSystem : MonoBehaviour
     private static bool AreLinesAligned(Vector3 lineA, Vector3 lineB, float maxAngle = 2)
     {
         return Vector3.Angle(lineA, lineB) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(lineA, lineB);
+    }
+
+    private enum OverlapCombination
+    {
+        Both,
+        PointA,
+        PointB,
+        None
     }
 }
 
