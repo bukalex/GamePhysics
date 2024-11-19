@@ -190,7 +190,7 @@ public class PhysicsSystem : MonoBehaviour
                     {
                         PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
-                        ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA]);
+                        ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeA], physicsShapes[shapeB], hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
 
@@ -230,19 +230,39 @@ public class PhysicsSystem : MonoBehaviour
         SurfacePoint pointA = shapeA.GetClosestPoint(shapeB.Position);
         SurfacePoint pointB = shapeB.GetClosestPoint(shapeA.Position);
 
-        if (shapeA.IsPointInside(pointB.position))
+        bool isPointAInside = shapeB.IsPointInside(pointA.position);
+        bool isPointBInside = shapeA.IsPointInside(pointB.position);
+
+        if (isPointAInside && isPointBInside)
         {
-            hitResult.impactPoint = pointB.position;
-            hitResult.impactNormal = shapeA.GetClosestPoint(pointB.position).normal;
-            
+            SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
+            SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
+
+            if (AreLinesAligned(pointA.normal, pointA2.normal))
+            {
+                hitResult.impactPoint = pointA.position;
+                hitResult.impactNormal = pointA.normal;
+            }
+            else if (AreLinesAligned(pointB.normal, pointB2.normal))
+            {
+                hitResult.impactPoint = pointB.position;
+                hitResult.impactNormal = pointB.normal;
+            }
+
             return true;
         }
-        
-        if (shapeB.IsPointInside(pointA.position))
+        else if (isPointAInside)
         {
             hitResult.impactPoint = pointA.position;
-            hitResult.impactNormal = shapeB.GetClosestPoint(pointA.position).normal;
-            
+            hitResult.impactNormal = pointA.normal;
+
+            return true;
+        }
+        else if (isPointBInside)
+        {
+            hitResult.impactPoint = pointB.position;
+            hitResult.impactNormal = pointB.normal;
+
             return true;
         }
 
@@ -283,7 +303,7 @@ public class PhysicsSystem : MonoBehaviour
 
         if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
         {
-            Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime);
+            Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime) - Fplane;
             targetShape.Body.AddForce(Ffr);
         }
         else
@@ -293,47 +313,24 @@ public class PhysicsSystem : MonoBehaviour
         #endregion
     }
 
-    private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB)
+    private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB, HitResult hitResult)
     {
         bool canShapeAMove = shapeA.Body && !shapeA.Body.IsStatic;
         bool canShapeBMove = shapeB.Body && !shapeB.Body.IsStatic;
 
         if (!canShapeAMove && !canShapeBMove) return;
+        if (!shapeA.HasFarthestPoint() && !shapeB.HasFarthestPoint()) return;
 
-        SurfacePoint pointA = shapeA.GetClosestPoint(shapeB.Position);
-        SurfacePoint pointB = shapeB.GetClosestPoint(shapeA.Position);
+        SurfacePoint pointA = default;
+        SurfacePoint pointB = default;
 
-        Vector3 AB = pointB.position - pointA.position;
-        Vector3 Displacement = AB;
+        if (shapeA.HasFarthestPoint()) pointA = shapeA.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
+        if (shapeB.HasFarthestPoint()) pointB = shapeB.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
 
-        float maxAngle = 5;
+        if (!shapeA.HasFarthestPoint()) pointA = shapeA.GetClosestPoint(pointB.position);
+        if (!shapeB.HasFarthestPoint()) pointB = shapeB.GetClosestPoint(pointA.position);
 
-        if (maxAngle < Vector3.Angle(AB, pointB.normal) && Vector3.Angle(AB, pointB.normal) < (180 - maxAngle) ||
-            maxAngle < Vector3.Angle(pointA.normal, AB) && Vector3.Angle(pointA.normal, AB) < (180 - maxAngle))
-        {
-            SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
-            SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
-
-            Vector3 A2B = pointB.position - pointA2.position;
-            Vector3 AB2 = pointB2.position - pointA.position;
-            Vector3 A2B2 = pointB2.position - pointA2.position;
-
-            if ((Vector3.Angle(A2B, pointB.normal) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(A2B, pointB.normal)) &&
-                (Vector3.Angle(pointA2.normal, A2B) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(pointA2.normal, A2B)))
-            {
-                Displacement = A2B;
-            }
-            else if ((Vector3.Angle(AB2, pointB2.normal) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(AB2, pointB2.normal)) &&
-                     (Vector3.Angle(pointA.normal, AB2) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(pointA.normal, AB2)))
-            {
-                Displacement = AB2;
-            }
-            else if ((Vector3.Angle(A2B2, pointB2.normal) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(A2B2, pointB2.normal)) &&
-                     (Vector3.Angle(pointA2.normal, A2B2) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(pointA2.normal, A2B2)))
-            {
-                Displacement = A2B2;
-            }
-        }
+        Vector3 Displacement = pointB.position - pointA.position;
 
         if (canShapeAMove) shapeA.Body.Position += Displacement * (canShapeBMove ? 0.5f : 1);
         if (canShapeBMove) shapeB.Body.Position += -Displacement * (canShapeAMove ? 0.5f : 1);
@@ -361,6 +358,11 @@ public class PhysicsSystem : MonoBehaviour
             default:
                 return 1;
         }
+    }
+
+    private static bool AreLinesAligned(Vector3 lineA, Vector3 lineB, float maxAngle = 2)
+    {
+        return Vector3.Angle(lineA, lineB) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(lineA, lineB);
     }
 }
 

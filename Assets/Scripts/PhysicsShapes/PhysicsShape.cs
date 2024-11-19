@@ -59,6 +59,11 @@ public abstract class PhysicsShape : MonoBehaviour
         PhysicsSystem.UnregisterPhysicsShape(this);
     }
 
+    public virtual bool HasFarthestPoint()
+    {
+        return true;
+    }
+
     public virtual bool TryOnBeginOverlap(PhysicsShape otherShape, HitResult hitResult)
     {
         if (overlapShapes.ContainsKey(otherShape)) return false;
@@ -148,6 +153,7 @@ public abstract class PhysicsShape : MonoBehaviour
     }
 
     public abstract SurfacePoint GetClosestPoint(Vector3 otherPoint);
+    public abstract SurfacePoint GetFarthestPoint(Vector3 origin, Vector3 normal, bool checkBothDirections = false);
     public abstract bool IsPointInside(Vector3 point);
     protected abstract void DrawWireShape();
 }

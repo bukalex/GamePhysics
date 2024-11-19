@@ -23,6 +23,16 @@ public class PhysicsPlane : PhysicsShape
         return point;
     }
 
+    public override bool HasFarthestPoint()
+    {
+        return false;
+    }
+
+    public override SurfacePoint GetFarthestPoint(Vector3 origin, Vector3 normal, bool checkBothDirections = false)
+    {
+        return default;
+    }
+
     public override bool IsPointInside(Vector3 point)
     {
         return Vector3.Dot(Normal, point - Position) == 0;

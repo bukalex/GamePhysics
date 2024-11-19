@@ -44,6 +44,26 @@ public class PhysicsCube : PhysicsShape
         return point;
     }
 
+    public override SurfacePoint GetFarthestPoint(Vector3 origin, Vector3 normal, bool checkBothDirections = false)
+    {
+        SurfacePoint point = default;
+
+        if (!checkBothDirections)
+        {
+            point = GetClosestPoint(origin + normal * 1000);
+        }
+        else
+        {
+            SurfacePoint pointA = GetClosestPoint(origin + normal * 1000);
+            SurfacePoint pointB = GetClosestPoint(origin - normal * 1000);
+
+            if ((pointA.position - origin).magnitude < (pointB.position - origin).magnitude) point = pointA;
+            else point = pointB;
+        }
+
+        return point;
+    }
+
     public override bool IsPointInside(Vector3 point)
     {
         Vector3 localPosition = Quaternion.Inverse(transform.rotation) * (point - Position);

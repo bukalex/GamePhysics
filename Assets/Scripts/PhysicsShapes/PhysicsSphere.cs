@@ -18,6 +18,35 @@ public class PhysicsSphere : PhysicsShape
         return point;
     }
 
+    public override SurfacePoint GetFarthestPoint(Vector3 origin, Vector3 normal, bool checkBothDirections = false)
+    {
+        SurfacePoint point = default;
+
+        if (!checkBothDirections)
+        {
+            point.normal = normal;
+            point.position = Position + point.normal * radius;
+        }
+        else
+        {
+            Vector3 posA = Position + normal * radius;
+            Vector3 posB = Position - normal * radius;
+
+            if ((posA - origin).magnitude < (posB - origin).magnitude)
+            {
+                point.normal = normal;
+                point.position = posA;
+            }
+            else
+            {
+                point.normal = -normal;
+                point.position = posB;
+            }
+        }
+
+        return point;
+    }
+
     public override bool IsPointInside(Vector3 point)
     {
         return Vector3.Distance(Position, point) <= radius;

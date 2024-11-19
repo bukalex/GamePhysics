@@ -75,6 +75,9 @@ public class PhysicsBody : MonoBehaviour
     [Min(0.001f)]
     private float mass = 1;
 
+    [SerializeField]
+    private bool lockRotation = false;
+
     private void Awake()
     {
         PhysicsSystem.RegisterPhysicsBody(this);
@@ -95,7 +98,7 @@ public class PhysicsBody : MonoBehaviour
         Vector3 distance = position - Position;
 
         Force += force;
-        Torque += Vector3.Cross(distance, force);
+        if (!lockRotation) Torque += Vector3.Cross(distance, force);
     }
 
     public void SetForce(Vector3 force = default)
