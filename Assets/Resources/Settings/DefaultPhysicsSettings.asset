@@ -21,4 +21,4 @@ MonoBehaviour:
   callOverlapAtFirstFrame: 0
   callHitAtFirstFrame: 0
   frictionMode: 1
-  bounceMode: 2
+  bounceMode: 1

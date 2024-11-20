@@ -237,6 +237,15 @@ public class PhysicsSystem : MonoBehaviour
             pointA2 = shapeA.GetFarthestPoint(pointB.position, -pointB.normal);
             if (shapeB.IsPointInside(pointA2.position) || shapeB.TryGetIntersectionPoint(shapeA.Position, pointA2.position, out SurfacePoint result))
             {
+                if (pointA2.position == pointA.position)
+                {
+                    pointB2 = shapeB.GetClosestPoint(pointA.position);
+                    hitResult.impactPoint = pointB2.position;
+                    hitResult.impactNormal = pointB2.normal;
+
+                    return true;
+                }
+
                 hitResult.impactPoint = pointA2.position;
                 hitResult.impactNormal = pointA2.normal;
                 
@@ -249,6 +258,15 @@ public class PhysicsSystem : MonoBehaviour
             pointB2 = shapeB.GetFarthestPoint(pointA.position, -pointA.normal);
             if (shapeA.IsPointInside(pointB2.position) || shapeA.TryGetIntersectionPoint(shapeB.Position, pointB2.position, out SurfacePoint result))
             {
+                if (pointB2.position == pointB.position)
+                {
+                    pointA2 = shapeA.GetClosestPoint(pointB.position);
+                    hitResult.impactPoint = pointA2.position;
+                    hitResult.impactNormal = pointA2.normal;
+
+                    return true;
+                }
+
                 hitResult.impactPoint = pointB2.position;
                 hitResult.impactNormal = pointB2.normal;
                 
@@ -363,19 +381,6 @@ public class PhysicsSystem : MonoBehaviour
             default:
                 return 1;
         }
-    }
-
-    private static bool AreLinesAligned(Vector3 lineA, Vector3 lineB, float maxAngle = 2)
-    {
-        return Vector3.Angle(lineA, lineB) <= maxAngle || (180 - maxAngle) <= Vector3.Angle(lineA, lineB);
-    }
-
-    private enum OverlapCombination
-    {
-        Both,
-        PointA,
-        PointB,
-        None
     }
 }
 
