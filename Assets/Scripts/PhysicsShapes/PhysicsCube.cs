@@ -60,8 +60,16 @@ public class PhysicsCube : PhysicsShape
             if ((pointA.position - origin).magnitude < (pointB.position - origin).magnitude) point = pointA;
             else point = pointB;
         }
+        point.normal = normal;
 
         return point;
+    }
+
+    public override bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result)
+    {
+        result = default;
+
+        return false;
     }
 
     public override bool IsPointInside(Vector3 point)

@@ -33,6 +33,18 @@ public class PhysicsPlane : PhysicsShape
         return default;
     }
 
+    public override bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result)
+    {
+        result = default;
+
+        if (Vector3.Dot(start - Position, Normal) * Vector3.Dot(end - Position, Normal) <= 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public override bool IsPointInside(Vector3 point)
     {
         return Vector3.Dot(Normal, point - Position) == 0;

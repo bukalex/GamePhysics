@@ -229,71 +229,32 @@ public class PhysicsSystem : MonoBehaviour
 
         SurfacePoint pointA = shapeA.GetClosestPoint(shapeB.Position);
         SurfacePoint pointB = shapeB.GetClosestPoint(shapeA.Position);
+        SurfacePoint pointA2;
+        SurfacePoint pointB2;
 
-        bool isPointAInside = shapeB.IsPointInside(pointA.position);
-        bool isPointBInside = shapeA.IsPointInside(pointB.position);
-
-        OverlapCombination combination;
-        if (isPointAInside && isPointBInside) combination = OverlapCombination.Both;
-        else if (isPointAInside) combination = OverlapCombination.PointA;
-        else if (isPointBInside) combination = OverlapCombination.PointB;
-        else combination = OverlapCombination.None;
-
-        switch (combination)
+        if (shapeA.HasFarthestPoint())
         {
-            case OverlapCombination.Both:
-                SurfacePoint pointA2 = shapeA.GetClosestPoint(pointB.position);
-                SurfacePoint pointB2 = shapeB.GetClosestPoint(pointA.position);
-
-                if (AreLinesAligned(pointA.normal, pointA2.normal))
-                {
-                    hitResult.impactPoint = pointA.position;
-                    hitResult.impactNormal = pointA.normal;
-                }
-                else if (AreLinesAligned(pointB.normal, pointB2.normal))
-                {
-                    hitResult.impactPoint = pointB.position;
-                    hitResult.impactNormal = pointB.normal;
-                }
-                else
-                {
-                    hitResult.impactPoint = pointA.position;
-                    hitResult.impactNormal = pointA.normal;
-                }
-
+            pointA2 = shapeA.GetFarthestPoint(pointB.position, -pointB.normal);
+            if (shapeB.IsPointInside(pointA2.position) || shapeB.TryGetIntersectionPoint(shapeA.Position, pointA2.position, out SurfacePoint result))
+            {
+                hitResult.impactPoint = pointA2.position;
+                hitResult.impactNormal = pointA2.normal;
+                
                 return true;
-
-            case OverlapCombination.PointA:
-                hitResult.impactPoint = pointA.position;
-                hitResult.impactNormal = pointA.normal;
-
-                return true;
-
-            case OverlapCombination.PointB:
-                hitResult.impactPoint = pointB.position;
-                hitResult.impactNormal = pointB.normal;
-
-                return true;
-
-            case OverlapCombination.None:
-                if (shapeA.HasFarthestPoint())
-                {
-                    pointA = shapeA.GetFarthestPoint(pointB.position, pointB.normal, true);
-                    pointB = shapeB.GetClosestPoint(pointA.position);
-
-                    if (shapeA.IsPointInside(pointB.position)) goto case OverlapCombination.PointB;
-                }
-                else if (shapeB.HasFarthestPoint())
-                {
-                    pointB = shapeB.GetFarthestPoint(pointA.position, pointA.normal, true);
-                    pointA = shapeA.GetClosestPoint(pointB.position);
-
-                    if (shapeB.IsPointInside(pointA.position)) goto case OverlapCombination.PointA;
-                }
-
-                break;
+            }
         }
 
+        if (shapeB.HasFarthestPoint())
+        {
+            pointB2 = shapeB.GetFarthestPoint(pointA.position, -pointA.normal);
+            if (shapeA.IsPointInside(pointB2.position) || shapeA.TryGetIntersectionPoint(shapeB.Position, pointB2.position, out SurfacePoint result))
+            {
+                hitResult.impactPoint = pointB2.position;
+                hitResult.impactNormal = pointB2.normal;
+                
+                return true;
+            }
+        }
 
         return false;
     }
@@ -374,6 +335,7 @@ public class PhysicsSystem : MonoBehaviour
         if (!shapeB.HasFarthestPoint()) pointB = shapeB.GetClosestPoint(pointA.position);
 
         Vector3 Displacement = pointB.position - pointA.position;
+        Debug.DrawLine(hitResult.impactPoint, hitResult.impactPoint + hitResult.impactNormal, Color.green);
 
         if (canShapeAMove) shapeA.Body.Position += Displacement * (canShapeBMove ? 0.5f : 1);
         if (canShapeBMove) shapeB.Body.Position += -Displacement * (canShapeAMove ? 0.5f : 1);

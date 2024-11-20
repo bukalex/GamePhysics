@@ -47,6 +47,13 @@ public class PhysicsSphere : PhysicsShape
         return point;
     }
 
+    public override bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result)
+    {
+        result = default;
+
+        return false;
+    }
+
     public override bool IsPointInside(Vector3 point)
     {
         return Vector3.Distance(Position, point) <= radius;
