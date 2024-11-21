@@ -153,7 +153,7 @@ public class PhysicsSystem : MonoBehaviour
 
     private static void ApplyVelocity(PhysicsBody physicsBody)
     {
-        if (physicsBody.Velocity.magnitude < Settings.movementThreshold) return;
+        if (physicsBody.Velocity.magnitude * Time.fixedDeltaTime < Settings.movementThreshold) return;
 
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
@@ -191,8 +191,8 @@ public class PhysicsSystem : MonoBehaviour
                         PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
                         ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
-                        ApplyCollisionResponse(physicsShapes[shapeA], physicsShapes[shapeB], hitResult);
-                        ApplyCollisionResponse(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeA], physicsShapes[shapeB], ref hitResult);
+                        ApplyCollisionResponse(physicsShapes[shapeB], physicsShapes[shapeA], ref hitResult);
 
                         if (!physicsShapes[shapeA].TryOnBeginHit(physicsShapes[shapeB], hitResult) || Settings.callHitAtFirstFrame)
                         {
@@ -224,6 +224,8 @@ public class PhysicsSystem : MonoBehaviour
     private static bool AreShapesOvelapping(PhysicsShape shapeA, PhysicsShape shapeB, out HitResult hitResult)
     {
         hitResult = default;
+        hitResult.hitShapeA = shapeA;
+        hitResult.hitShapeB = shapeB;
 
         if (shapeA == shapeB) return false;
 
@@ -248,7 +250,7 @@ public class PhysicsSystem : MonoBehaviour
 
                 hitResult.impactPoint = pointA2.position;
                 hitResult.impactNormal = pointA2.normal;
-                
+
                 return true;
             }
         }
@@ -277,7 +279,7 @@ public class PhysicsSystem : MonoBehaviour
         return false;
     }
 
-    private static void ApplyCollisionResponse(PhysicsShape targetShape, PhysicsShape hitShape, HitResult hitResult)
+    private static void ApplyCollisionResponse(PhysicsShape targetShape, PhysicsShape hitShape, ref HitResult hitResult)
     {
         if (!targetShape || !targetShape.Body || targetShape.Body.IsStatic) return;
         
@@ -301,6 +303,7 @@ public class PhysicsSystem : MonoBehaviour
 
         Vector3 Fnorm = (VnormResTarget - VnormTarget) * targetShape.Body.Mass / Time.fixedDeltaTime;
         targetShape.Body.AddForce(Fnorm, hitResult.impactPoint);
+        hitResult.normalForceMagnitude = Fnorm.magnitude;
         #endregion
 
         #region Friction
@@ -353,7 +356,6 @@ public class PhysicsSystem : MonoBehaviour
         if (!shapeB.HasFarthestPoint()) pointB = shapeB.GetClosestPoint(pointA.position);
 
         Vector3 Displacement = pointB.position - pointA.position;
-        Debug.DrawLine(hitResult.impactPoint, hitResult.impactPoint + hitResult.impactNormal, Color.green);
 
         if (canShapeAMove) shapeA.Body.Position += Displacement * (canShapeBMove ? 0.5f : 1);
         if (canShapeBMove) shapeB.Body.Position += -Displacement * (canShapeAMove ? 0.5f : 1);
@@ -388,4 +390,7 @@ public struct HitResult
 {
     public Vector3 impactPoint;
     public Vector3 impactNormal;
+    public float normalForceMagnitude;
+    public PhysicsShape hitShapeA;
+    public PhysicsShape hitShapeB;
 }
