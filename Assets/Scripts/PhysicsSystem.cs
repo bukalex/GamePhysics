@@ -292,9 +292,12 @@ public class PhysicsSystem : MonoBehaviour
 
         if (hitShape && hitShape.Body && !hitShape.Body.IsStatic)
         {
+            Vector3 VplaneHit = Vector3.ProjectOnPlane(hitShape.Body.Velocity, hitResult.impactNormal);
             Vector3 VnHit = Vector3.Project(hitShape.Body.Velocity, hitResult.impactNormal);
+
             VnormResTarget = bounce * (2 * hitShape.Body.Mass * VnHit + VnormTarget * (targetShape.Body.Mass - hitShape.Body.Mass)) /
                 (targetShape.Body.Mass + hitShape.Body.Mass);
+            VplaneTarget -= VplaneHit;
         }
         else
         {
@@ -307,19 +310,22 @@ public class PhysicsSystem : MonoBehaviour
         #endregion
 
         #region Friction
-        float dynamicFriction = GetCoefficient(targetShape.dynamicFriction, hitShape.dynamicFriction, Settings.frictionMode);
-
-        Vector3 Fplane = Vector3.ProjectOnPlane(targetShape.Body.Force, hitResult.impactNormal);
-        Vector3 Ffr = -VplaneTarget.normalized * Fnorm.magnitude * dynamicFriction;
-
-        if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
+        if (VplaneTarget.magnitude * Time.fixedDeltaTime < Settings.movementThreshold)
         {
-            Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime) - Fplane;
-            targetShape.Body.AddForce(Ffr);
-        }
-        else
-        {
-            targetShape.Body.AddForce(Ffr, hitResult.impactPoint);
+            float dynamicFriction = GetCoefficient(targetShape.dynamicFriction, hitShape.dynamicFriction, Settings.frictionMode);
+
+            Vector3 Fplane = Vector3.ProjectOnPlane(targetShape.Body.Force, hitResult.impactNormal);
+            Vector3 Ffr = -VplaneTarget.normalized * Fnorm.magnitude * dynamicFriction;
+
+            if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
+            {
+                Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime) - Fplane;
+                targetShape.Body.AddForce(Ffr);
+            }
+            else
+            {
+                targetShape.Body.AddForce(Ffr, hitResult.impactPoint);
+            }
         }
         #endregion
     }

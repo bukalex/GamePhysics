@@ -15,7 +15,7 @@ MonoBehaviour:
   isEnabled: 1
   gravity: {x: 0, y: -9.8, z: 0}
   deadZone: -50
-  movementThreshold: 0.001
+  movementThreshold: 0.002
   rotationThreshold: 0.05
   enableLogs: 0
   callOverlapAtFirstFrame: 0
