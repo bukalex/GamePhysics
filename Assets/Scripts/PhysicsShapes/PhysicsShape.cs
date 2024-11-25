@@ -154,7 +154,7 @@ public abstract class PhysicsShape : MonoBehaviour
 
     public abstract SurfacePoint GetClosestPoint(Vector3 otherPoint);
     public abstract SurfacePoint GetFarthestPoint(Vector3 origin, Vector3 normal, bool checkBothDirections = false);
-    public abstract bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result);
+    public abstract bool IsOverlapingWithShape(PhysicsShape otherShape, out HitResult hitResult);
     public abstract bool IsPointInside(Vector3 point);
     protected abstract void DrawWireShape();
 }

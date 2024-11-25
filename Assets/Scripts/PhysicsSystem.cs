@@ -171,7 +171,8 @@ public class PhysicsSystem : MonoBehaviour
                 if (!physicsShapes[shapeB]) continue;
                 if (!physicsShapes[shapeB].isActiveAndEnabled) continue;
 
-                if (AreShapesOvelapping(physicsShapes[shapeA], physicsShapes[shapeB], out HitResult hitResult))
+                HitResult hitResult;
+                if (physicsShapes[shapeA].IsOverlapingWithShape(physicsShapes[shapeB], out hitResult) || physicsShapes[shapeB].IsOverlapingWithShape(physicsShapes[shapeA], out hitResult))
                 {
                     if (physicsShapes[shapeA].isTrigger || physicsShapes[shapeB].isTrigger)
                     {
@@ -221,64 +222,6 @@ public class PhysicsSystem : MonoBehaviour
         }
     }
 
-    private static bool AreShapesOvelapping(PhysicsShape shapeA, PhysicsShape shapeB, out HitResult hitResult)
-    {
-        hitResult = default;
-        hitResult.hitShapeA = shapeA;
-        hitResult.hitShapeB = shapeB;
-
-        if (shapeA == shapeB) return false;
-
-        SurfacePoint pointA = shapeA.GetClosestPoint(shapeB.Position);
-        SurfacePoint pointB = shapeB.GetClosestPoint(shapeA.Position);
-        SurfacePoint pointA2;
-        SurfacePoint pointB2;
-
-        if (shapeA.HasFarthestPoint())
-        {
-            pointA2 = shapeA.GetFarthestPoint(pointB.position, -pointB.normal);
-            if (shapeB.IsPointInside(pointA2.position) || shapeB.TryGetIntersectionPoint(shapeA.Position, pointA2.position, out SurfacePoint result))
-            {
-                if (pointA2.position == pointA.position)
-                {
-                    pointB2 = shapeB.GetClosestPoint(pointA.position);
-                    hitResult.impactPoint = pointB2.position;
-                    hitResult.impactNormal = pointB2.normal;
-
-                    return true;
-                }
-
-                hitResult.impactPoint = pointA2.position;
-                hitResult.impactNormal = pointA2.normal;
-
-                return true;
-            }
-        }
-
-        if (shapeB.HasFarthestPoint())
-        {
-            pointB2 = shapeB.GetFarthestPoint(pointA.position, -pointA.normal);
-            if (shapeA.IsPointInside(pointB2.position) || shapeA.TryGetIntersectionPoint(shapeB.Position, pointB2.position, out SurfacePoint result))
-            {
-                if (pointB2.position == pointB.position)
-                {
-                    pointA2 = shapeA.GetClosestPoint(pointB.position);
-                    hitResult.impactPoint = pointA2.position;
-                    hitResult.impactNormal = pointA2.normal;
-
-                    return true;
-                }
-
-                hitResult.impactPoint = pointB2.position;
-                hitResult.impactNormal = pointB2.normal;
-                
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static void ApplyCollisionResponse(PhysicsShape targetShape, PhysicsShape hitShape, ref HitResult hitResult)
     {
         if (!targetShape || !targetShape.Body || targetShape.Body.IsStatic) return;
@@ -310,22 +253,19 @@ public class PhysicsSystem : MonoBehaviour
         #endregion
 
         #region Friction
-        if (VplaneTarget.magnitude * Time.fixedDeltaTime < Settings.movementThreshold)
+        float dynamicFriction = GetCoefficient(targetShape.dynamicFriction, hitShape.dynamicFriction, Settings.frictionMode);
+
+        Vector3 Fplane = Vector3.ProjectOnPlane(targetShape.Body.Force, hitResult.impactNormal);
+        Vector3 Ffr = -VplaneTarget.normalized * Fnorm.magnitude * dynamicFriction;
+
+        if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
         {
-            float dynamicFriction = GetCoefficient(targetShape.dynamicFriction, hitShape.dynamicFriction, Settings.frictionMode);
-
-            Vector3 Fplane = Vector3.ProjectOnPlane(targetShape.Body.Force, hitResult.impactNormal);
-            Vector3 Ffr = -VplaneTarget.normalized * Fnorm.magnitude * dynamicFriction;
-
-            if (Vector3.Dot((Fplane + Ffr) / targetShape.Body.Mass * Time.fixedDeltaTime + VplaneTarget, VplaneTarget) < 0)
-            {
-                Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime) - Fplane;
-                targetShape.Body.AddForce(Ffr);
-            }
-            else
-            {
-                targetShape.Body.AddForce(Ffr, hitResult.impactPoint);
-            }
+            Ffr = targetShape.Body.Mass * (-VplaneTarget / Time.fixedDeltaTime) - Fplane;
+            targetShape.Body.AddForce(Ffr);
+        }
+        else
+        {
+            targetShape.Body.AddForce(Ffr, hitResult.impactPoint);
         }
         #endregion
     }
@@ -336,35 +276,11 @@ public class PhysicsSystem : MonoBehaviour
         bool canShapeBMove = shapeB.Body && !shapeB.Body.IsStatic;
 
         if (!canShapeAMove && !canShapeBMove) return;
-        if (!shapeA.HasFarthestPoint() && !shapeB.HasFarthestPoint()) return;
 
-        SurfacePoint pointA = default;
-        SurfacePoint pointB = default;
+        Vector3 DisplacementAB = hitResult.impactNormal * hitResult.depth * Mathf.Sign(Vector3.Dot(shapeB.Position - shapeA.Position, hitResult.impactNormal));
 
-        if (shapeA.HasFarthestPoint())
-        {
-            if (shapeB.IsPointInside(shapeA.Position))
-            {
-                pointA = shapeA.GetFarthestPoint(hitResult.impactPoint, Vector3.Project(shapeA.Position - hitResult.impactPoint, hitResult.impactNormal));
-            }
-            else pointA = shapeA.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
-        }
-        if (shapeB.HasFarthestPoint())
-        {
-            if (shapeA.IsPointInside(shapeB.Position))
-            {
-                pointB = shapeB.GetFarthestPoint(hitResult.impactPoint, Vector3.Project(shapeB.Position - hitResult.impactPoint, hitResult.impactNormal));
-            }
-            else pointB = shapeB.GetFarthestPoint(hitResult.impactPoint, hitResult.impactNormal, true);
-        }
-
-        if (!shapeA.HasFarthestPoint()) pointA = shapeA.GetClosestPoint(pointB.position);
-        if (!shapeB.HasFarthestPoint()) pointB = shapeB.GetClosestPoint(pointA.position);
-
-        Vector3 Displacement = pointB.position - pointA.position;
-
-        if (canShapeAMove) shapeA.Body.Position += Displacement * (canShapeBMove ? 0.5f : 1);
-        if (canShapeBMove) shapeB.Body.Position += -Displacement * (canShapeAMove ? 0.5f : 1);
+        if (canShapeAMove) shapeA.Body.Position += -DisplacementAB * (canShapeBMove ? 0.5f : 1);
+        if (canShapeBMove) shapeB.Body.Position += DisplacementAB * (canShapeAMove ? 0.5f : 1);
     }
 
     private static void PrintLog(string log)
@@ -396,6 +312,7 @@ public struct HitResult
 {
     public Vector3 impactPoint;
     public Vector3 impactNormal;
+    public float depth;
     public float normalForceMagnitude;
     public PhysicsShape hitShapeA;
     public PhysicsShape hitShapeB;

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 public class PhysicsCube : PhysicsShape
 {
@@ -65,9 +66,38 @@ public class PhysicsCube : PhysicsShape
         return point;
     }
 
-    public override bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result)
+    public override bool IsOverlapingWithShape(PhysicsShape otherShape, out HitResult hitResult)
     {
-        result = default;
+        hitResult = default;
+        hitResult.hitShapeA = this;
+        hitResult.hitShapeB = otherShape;
+
+        if (otherShape.HasFarthestPoint())
+        {
+            SurfacePoint pointA = GetClosestPoint(otherShape.Position);
+            if (otherShape.IsPointInside(pointA.position))
+            {
+                SurfacePoint pointB = otherShape.GetClosestPoint(pointA.position);
+                hitResult.impactPoint = pointA.position;
+                hitResult.impactNormal = pointB.normal;
+                hitResult.depth = (pointA.position - pointB.position).magnitude;
+
+                return true;
+            }
+        }
+        else
+        {
+            SurfacePoint pointB = otherShape.GetClosestPoint(Position);
+            if (IsPointInside(pointB.position))
+            {
+                SurfacePoint pointA = GetClosestPoint(pointB.position);
+                hitResult.impactPoint = pointB.position;
+                hitResult.impactNormal = pointB.normal;
+                hitResult.depth = (pointA.position - pointB.position).magnitude;
+
+                return true;
+            }
+        }
 
         return false;
     }

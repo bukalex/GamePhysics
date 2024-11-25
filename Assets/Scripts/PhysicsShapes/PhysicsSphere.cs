@@ -47,9 +47,21 @@ public class PhysicsSphere : PhysicsShape
         return point;
     }
 
-    public override bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result)
+    public override bool IsOverlapingWithShape(PhysicsShape otherShape, out HitResult hitResult)
     {
-        result = default;
+        hitResult = default;
+        hitResult.hitShapeA = this;
+        hitResult.hitShapeB = otherShape;
+
+        SurfacePoint pointB = otherShape.GetClosestPoint(Position);
+        if (IsPointInside(pointB.position))
+        {
+            hitResult.impactPoint = pointB.position;
+            hitResult.impactNormal = (Position - hitResult.impactPoint).normalized;
+            hitResult.depth = radius - (Position - hitResult.impactPoint).magnitude;
+
+            return true;
+        }
 
         return false;
     }

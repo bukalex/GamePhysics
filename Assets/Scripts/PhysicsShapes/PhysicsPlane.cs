@@ -33,13 +33,25 @@ public class PhysicsPlane : PhysicsShape
         return default;
     }
 
-    public override bool TryGetIntersectionPoint(Vector3 start, Vector3 end, out SurfacePoint result)
+    public override bool IsOverlapingWithShape(PhysicsShape otherShape, out HitResult hitResult)
     {
-        result = default;
+        hitResult = default;
+        hitResult.hitShapeA = this;
+        hitResult.hitShapeB = otherShape;
 
-        if (Vector3.Dot(start - Position, Normal) * Vector3.Dot(end - Position, Normal) <= 0)
+        if (otherShape.HasFarthestPoint())
         {
-            return true;
+            SurfacePoint pointB = otherShape.GetFarthestPoint(Position, Normal);
+            SurfacePoint pointB2 = otherShape.GetFarthestPoint(Position, -Normal);
+            if (Vector3.Dot(Normal, pointB.position - Position) * Vector3.Dot(Normal, pointB2.position - Position) <= 0)
+            {
+                SurfacePoint bestPointB = otherShape.GetFarthestPoint(Position, Normal, true);
+                hitResult.impactPoint = GetClosestPoint(bestPointB.position).position;
+                hitResult.impactNormal = Normal;
+                hitResult.depth = (bestPointB.position - hitResult.impactPoint).magnitude;
+
+                return true;
+            }
         }
 
         return false;
