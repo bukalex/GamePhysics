@@ -268,6 +268,11 @@ public class PhysicsSystem : MonoBehaviour
             targetShape.Body.AddForce(Ffr, hitResult.impactPoint);
         }
         #endregion
+
+        Debug.DrawLine(targetShape.Position, targetShape.Position + Fnorm, Color.green);
+        Debug.DrawLine(targetShape.Position, targetShape.Position + Ffr, new Color(1, 0.5f, 0));
+        Debug.DrawLine(targetShape.Position, targetShape.Position + targetShape.Body.Mass * Settings.gravity, Color.magenta);
+        Debug.DrawLine(targetShape.Position, targetShape.Position + targetShape.Body.Velocity, Color.red);
     }
 
     private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB, HitResult hitResult)
