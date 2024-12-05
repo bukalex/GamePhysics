@@ -225,6 +225,7 @@ public class PhysicsSystem : MonoBehaviour
     private static void ApplyCollisionResponse(PhysicsShape targetShape, PhysicsShape hitShape, ref HitResult hitResult)
     {
         if (!targetShape || !targetShape.Body || targetShape.Body.IsStatic) return;
+        if (Vector3.Dot(targetShape.Body.Velocity, hitResult.impactPoint - targetShape.Position) < 0) return;
         
         Vector3 VplaneTarget = Vector3.ProjectOnPlane(targetShape.Body.Velocity, hitResult.impactNormal);
         Vector3 VnormTarget = Vector3.Project(targetShape.Body.Velocity, hitResult.impactNormal);

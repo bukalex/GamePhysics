@@ -76,7 +76,7 @@ public class PhysicsBody : MonoBehaviour
     private float mass = 1;
 
     [SerializeField]
-    private bool lockRotation = false;
+    private bool lockRotation = true;
 
     private void Awake()
     {
@@ -86,6 +86,11 @@ public class PhysicsBody : MonoBehaviour
     private void OnDestroy()
     {
         PhysicsSystem.UnregisterPhysicsBody(this);
+    }
+
+    public void AddImpulse(Vector3 impulse)
+    {
+        Velocity += impulse / Mass;
     }
 
     public void AddForce(Vector3 force)

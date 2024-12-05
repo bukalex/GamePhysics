@@ -72,31 +72,15 @@ public class PhysicsCube : PhysicsShape
         hitResult.hitShapeA = this;
         hitResult.hitShapeB = otherShape;
 
-        if (otherShape.HasFarthestPoint())
+        SurfacePoint pointB = otherShape.GetClosestPoint(Position);
+        if (IsPointInside(pointB.position))
         {
-            SurfacePoint pointA = GetClosestPoint(otherShape.Position);
-            if (otherShape.IsPointInside(pointA.position))
-            {
-                SurfacePoint pointB = otherShape.GetClosestPoint(pointA.position);
-                hitResult.impactPoint = pointA.position;
-                hitResult.impactNormal = pointB.normal;
-                hitResult.depth = (pointA.position - pointB.position).magnitude;
+            SurfacePoint pointA = GetClosestPoint(pointB.position);
+            hitResult.impactPoint = pointA.position;
+            hitResult.impactNormal = pointA.normal;
+            hitResult.depth = (pointA.position - pointB.position).magnitude;
 
-                return true;
-            }
-        }
-        else
-        {
-            SurfacePoint pointB = otherShape.GetClosestPoint(Position);
-            if (IsPointInside(pointB.position))
-            {
-                SurfacePoint pointA = GetClosestPoint(pointB.position);
-                hitResult.impactPoint = pointB.position;
-                hitResult.impactNormal = pointB.normal;
-                hitResult.depth = (pointA.position - pointB.position).magnitude;
-
-                return true;
-            }
+            return true;
         }
 
         return false;

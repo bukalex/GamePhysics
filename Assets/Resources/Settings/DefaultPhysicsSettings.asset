@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isEnabled: 1
   gravity: {x: 0, y: -9.8, z: 0}
-  deadZone: -50
+  deadZone: -15
   movementThreshold: 0.005
   rotationThreshold: 0.05
   enableLogs: 0
