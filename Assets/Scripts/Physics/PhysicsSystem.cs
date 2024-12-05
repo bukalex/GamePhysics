@@ -46,14 +46,22 @@ public class PhysicsSystem : MonoBehaviour
             if (physicsBody.IsStatic) continue;
 
             ApplyGravity(physicsBody);
-            ApplyTorque(physicsBody);
-            ApplyAngularVelocity(physicsBody);
             ApplyForce(physicsBody);
-            ApplyDamping(physicsBody);
-            ApplyVelocity(physicsBody);
         }
 
         RunCollisionChecks();
+
+        foreach (PhysicsBody physicsBody in physicsBodies)
+        {
+            if (!physicsBody) continue;
+            if (!physicsBody.isActiveAndEnabled) continue;
+            if (physicsBody.IsStatic) continue;
+
+            ApplyForce(physicsBody);
+            ApplyDamping(physicsBody);
+            ApplyVelocity(physicsBody);
+            ResetValues(physicsBody);
+        }
     }
 
     #region Registration
@@ -116,7 +124,6 @@ public class PhysicsSystem : MonoBehaviour
         if (physicsBody.Torque.magnitude > 0)
         {
             physicsBody.AngularVelocity += (physicsBody.Torque / physicsBody.AngularDrag) * Time.fixedDeltaTime;
-            physicsBody.SetTorque();
         }
         else
         {
@@ -140,7 +147,6 @@ public class PhysicsSystem : MonoBehaviour
     private static void ApplyForce(PhysicsBody physicsBody)
     {
         physicsBody.Velocity += (physicsBody.Force / physicsBody.Mass) * Time.fixedDeltaTime;
-        physicsBody.SetForce();
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
@@ -157,6 +163,12 @@ public class PhysicsSystem : MonoBehaviour
 
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
+    }
+
+    private static void ResetValues(PhysicsBody physicsBody)
+    {
+        physicsBody.SetForce();
+        physicsBody.SetTorque();
     }
 
     private static void RunCollisionChecks()
@@ -191,7 +203,7 @@ public class PhysicsSystem : MonoBehaviour
                     {
                         PrintLog("Collision detected: " + physicsShapes[shapeA].name + " and " + physicsShapes[shapeB].name);
 
-                        ApplyMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
+                        AddMinimumTranslation(physicsShapes[shapeB], physicsShapes[shapeA], hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeA], physicsShapes[shapeB], ref hitResult);
                         ApplyCollisionResponse(physicsShapes[shapeB], physicsShapes[shapeA], ref hitResult);
 
@@ -225,7 +237,7 @@ public class PhysicsSystem : MonoBehaviour
     private static void ApplyCollisionResponse(PhysicsShape targetShape, PhysicsShape hitShape, ref HitResult hitResult)
     {
         if (!targetShape || !targetShape.Body || targetShape.Body.IsStatic) return;
-        if (Vector3.Dot(targetShape.Body.Velocity, hitResult.impactPoint - targetShape.Position) < 0) return;
+        if (Vector3.Dot(targetShape.Body.Velocity, hitResult.impactPoint - targetShape.Position) <= 0) return;
         
         Vector3 VplaneTarget = Vector3.ProjectOnPlane(targetShape.Body.Velocity, hitResult.impactNormal);
         Vector3 VnormTarget = Vector3.Project(targetShape.Body.Velocity, hitResult.impactNormal);
@@ -271,7 +283,7 @@ public class PhysicsSystem : MonoBehaviour
         #endregion
     }
 
-    private static void ApplyMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB, HitResult hitResult)
+    private static void AddMinimumTranslation(PhysicsShape shapeA, PhysicsShape shapeB, HitResult hitResult)
     {
         bool canShapeAMove = shapeA.Body && !shapeA.Body.IsStatic;
         bool canShapeBMove = shapeB.Body && !shapeB.Body.IsStatic;
