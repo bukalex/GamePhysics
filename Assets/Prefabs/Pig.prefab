@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4320005271919186998}
   - component: {fileID: 4707796789993333651}
   - component: {fileID: 7528922701330205971}
+  - component: {fileID: 4025135508495454403}
   m_Layer: 0
   m_Name: Pig
   m_TagString: Untagged
@@ -149,3 +150,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb259ecd42a620948acb79e0d54895e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4025135508495454403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505691152477720467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a73f4afe182b3d2478b5f1fe8c0ff550, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 0.016464932, g: 0.6981132, b: 0.17776106, a: 1}

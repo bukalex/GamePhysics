@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1570450512370440090}
   - component: {fileID: 951586782936372829}
   - component: {fileID: 7387661570892030723}
+  - component: {fileID: -5156491256949286107}
   m_Layer: 0
   m_Name: BirdCube
   m_TagString: Untagged
@@ -135,3 +136,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minimumDisplacement: 0.1
   destroyDelay: 1.5
+--- !u!114 &-5156491256949286107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701097025955125750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a73f4afe182b3d2478b5f1fe8c0ff550, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 0.1792453, g: 0.15979888, b: 0.15979888, a: 1}
