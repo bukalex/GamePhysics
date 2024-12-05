@@ -12,7 +12,7 @@ public class Sling : MonoBehaviour
     }
 
     [SerializeField]
-    private Bird birdPrefab;
+    private Bird[] birdPrefabs;
 
     [SerializeField]
     private Transform origin;
@@ -33,6 +33,7 @@ public class Sling : MonoBehaviour
     private LineRenderer previousLineRenderer;
 
     private Bird currentBird;
+    private int currentBirdIndex = 0;
     private SlingState state = SlingState.Waiting;
     private Vector3 initialMousePosition;
     private Vector3 mouseDelta;
@@ -50,6 +51,10 @@ public class Sling : MonoBehaviour
 
                     lineRenderer.enabled = true;
                 }
+                else if (Input.GetKeyDown(KeyCode.Tab))
+                {
+                    ChangeBird();
+                }
                 break;
 
             case SlingState.Aiming:
@@ -62,6 +67,15 @@ public class Sling : MonoBehaviour
                     positions = PhysicsSystem.PredictPath(currentBird.transform.position, -mouseDelta * impulsePerUnit / currentBird.GetMass(), currentBird.GetComponent<PhysicsShape>(), 35);
                     lineRenderer.positionCount = positions.Length;
                     lineRenderer.SetPositions(positions);
+
+                    if (Input.GetMouseButtonDown(1))
+                    {
+                        state = SlingState.Ready;
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Tab))
+                    {
+                        ChangeBird();
+                    }
                 }
                 else if (Input.GetMouseButtonUp(0))
                 {
@@ -78,10 +92,19 @@ public class Sling : MonoBehaviour
             case SlingState.Waiting:
                 if (!currentBird)
                 {
-                    currentBird = Instantiate(birdPrefab, origin.position, Quaternion.identity);
+                    currentBird = Instantiate(birdPrefabs[currentBirdIndex], origin.position, Quaternion.identity);
                     state = SlingState.Ready;
                 }
                 break;
         }
+    }
+
+    private void ChangeBird()
+    {
+        currentBirdIndex++;
+        currentBirdIndex %= birdPrefabs.Length;
+
+        if (currentBird) Destroy(currentBird.gameObject);
+        currentBird = Instantiate(birdPrefabs[currentBirdIndex], origin.position, Quaternion.identity);
     }
 }

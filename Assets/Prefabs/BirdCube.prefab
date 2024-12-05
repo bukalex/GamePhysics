@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8903999648423825647
+--- !u!1 &701097025955125750
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,49 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5977347292151416711}
-  - component: {fileID: 3373246320895592117}
-  - component: {fileID: 6103184936786006899}
-  - component: {fileID: 339958836041002319}
-  - component: {fileID: 6807411477247780508}
-  - component: {fileID: 7493473149848646469}
+  - component: {fileID: 1164959933697346535}
+  - component: {fileID: 7967680443752774635}
+  - component: {fileID: 7169218657077758233}
+  - component: {fileID: 1570450512370440090}
+  - component: {fileID: 951586782936372829}
+  - component: {fileID: 7387661570892030723}
   m_Layer: 0
-  m_Name: Bird
+  m_Name: BirdCube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5977347292151416711
+--- !u!4 &1164959933697346535
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8903999648423825647}
+  m_GameObject: {fileID: 701097025955125750}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.11, y: -0.61, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -2.39, y: -1.05, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &3373246320895592117
+--- !u!33 &7967680443752774635
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8903999648423825647}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &6103184936786006899
+  m_GameObject: {fileID: 701097025955125750}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &7169218657077758233
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8903999648423825647}
+  m_GameObject: {fileID: 701097025955125750}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -86,16 +86,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &339958836041002319
+--- !u!114 &1570450512370440090
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8903999648423825647}
+  m_GameObject: {fileID: 701097025955125750}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 926fd5b15786e1643b19d0860f9c80e2, type: 3}
+  m_Script: {fileID: 11500000, guid: 64195e40947b8194e97943213d4f3667, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isTrigger: 0
@@ -103,14 +103,14 @@ MonoBehaviour:
   dynamicFriction: 0.3
   bounce: 0.5
   offset: {x: 0, y: 0, z: 0}
-  radius: 0.5
---- !u!114 &6807411477247780508
+  size: {x: 0.75, y: 0.75, z: 0.75}
+--- !u!114 &951586782936372829
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8903999648423825647}
+  m_GameObject: {fileID: 701097025955125750}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31a641e3750524f4287080086e250412, type: 3}
@@ -119,15 +119,15 @@ MonoBehaviour:
   IsStatic: 0
   drag: 0
   angularDrag: 1
-  mass: 1
+  mass: 1.7
   lockRotation: 1
---- !u!114 &7493473149848646469
+--- !u!114 &7387661570892030723
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8903999648423825647}
+  m_GameObject: {fileID: 701097025955125750}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 826ceeb614f5cb2409492e8e74bf32f8, type: 3}
