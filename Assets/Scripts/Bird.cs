@@ -39,4 +39,9 @@ public class Bird : MonoBehaviour
         body.AddImpulse(impulse);
         body.IsStatic = false;
     }
+
+    public float GetMass()
+    {
+        return body.Mass;
+    }
 }

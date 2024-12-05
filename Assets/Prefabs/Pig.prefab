@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e5f279eb3207b849b3ae2ac24715603, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  toughness: 400
+  toughness: 250
   scorePoints: 5
   energySavedOnDestroy: 0.5
 --- !u!114 &7528922701330205971

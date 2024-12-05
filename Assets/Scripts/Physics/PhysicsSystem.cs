@@ -57,11 +57,38 @@ public class PhysicsSystem : MonoBehaviour
             if (!physicsBody.isActiveAndEnabled) continue;
             if (physicsBody.IsStatic) continue;
 
-            ApplyForce(physicsBody);
             ApplyDamping(physicsBody);
             ApplyVelocity(physicsBody);
-            ResetValues(physicsBody);
         }
+    }
+
+    public static Vector3[] PredictPath(Vector3 initialPosition, Vector3 initialVelocity, PhysicsShape shapeToIgnore, float maxDistance = 25)
+    {
+        List<Vector3> positions = new List<Vector3>() { initialPosition };
+        Vector3 prevPoint = initialPosition;
+        Vector3 nextPoint = initialPosition;
+        Vector3 velocity = initialVelocity;
+        float distance = 0f;
+
+        while (distance < maxDistance)
+        {
+            velocity += Settings.gravity * Time.fixedDeltaTime;
+            nextPoint = prevPoint + velocity * Time.fixedDeltaTime;
+            distance += (nextPoint - prevPoint).magnitude;
+            prevPoint = nextPoint;
+
+            positions.Add(nextPoint);
+            foreach (PhysicsShape shape in physicsShapes)
+            {
+                if (!shape) continue;
+                if (!shape.isActiveAndEnabled) continue;
+                if (shape == shapeToIgnore) continue;
+
+                if (shape.IsPointInside(nextPoint)) return positions.ToArray();
+            }
+        }
+
+        return positions.ToArray();
     }
 
     #region Registration
@@ -124,6 +151,7 @@ public class PhysicsSystem : MonoBehaviour
         if (physicsBody.Torque.magnitude > 0)
         {
             physicsBody.AngularVelocity += (physicsBody.Torque / physicsBody.AngularDrag) * Time.fixedDeltaTime;
+            physicsBody.SetTorque();
         }
         else
         {
@@ -147,6 +175,7 @@ public class PhysicsSystem : MonoBehaviour
     private static void ApplyForce(PhysicsBody physicsBody)
     {
         physicsBody.Velocity += (physicsBody.Force / physicsBody.Mass) * Time.fixedDeltaTime;
+        physicsBody.SetForce();
     }
 
     private static void ApplyDamping(PhysicsBody physicsBody)
@@ -163,12 +192,6 @@ public class PhysicsSystem : MonoBehaviour
 
         physicsBody.Position += physicsBody.Velocity * Time.fixedDeltaTime;
         if (physicsBody.Position.y <= Settings.deadZone) Destroy(physicsBody.gameObject);
-    }
-
-    private static void ResetValues(PhysicsBody physicsBody)
-    {
-        physicsBody.SetForce();
-        physicsBody.SetTorque();
     }
 
     private static void RunCollisionChecks()
